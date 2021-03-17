@@ -20,12 +20,9 @@ export default (context, inject) => {
   inject('error', errorHandler)
   context.$error = errorHandler
 
-  // if (process.env.NODE_ENV === 'development') {
-  //   context.app.watch = {
-  //     'nuxt.err' (val) {
-  //       console.log('error')
-  //     }
-  //   }
-  //   console.log(context, inject)
-  // }
+  if (process.env.NODE_ENV === 'development') {
+    Vue.config.errorHandler = (err, vm, info, ...rest) => {
+      console.error(err.message, info)
+    }
+  }
 }

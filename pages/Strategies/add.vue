@@ -27,13 +27,12 @@ export default {
     async save () {
       if (!this.$refs.form.validate()) { return }
       this.loading = true
-      const { data: { strategyId, message, errors }, status } = await this.$axios.post('/v1/strategies', {
+      const { data: { strategy, message, errors }, status } = await this.$axios.post('/v1/strategies', {
         ...this.strategy
       }).catch(e => e)
       this.loading = false
       if (this.$error(status, message, errors)) { return }
-      await this.$router.push('/strategies/edit/' + strategyId)
-      await this.$router.push('/strategies/view/' + strategyId)
+      await this.$router.replace('/strategies/view/' + strategy.id)
     }
   }
 

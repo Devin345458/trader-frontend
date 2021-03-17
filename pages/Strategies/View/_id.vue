@@ -92,107 +92,66 @@ export default {
     }
   },
   mounted () {
-    this.getLogs()
-    this.getTrades()
+    this.setupSocketListeners()
     this.getStrategy()
-    this.getCoinTicks()
+    this.getTrades()
+    this.getTradeTicks()
     this.getIndicators()
     this.onResize()
   },
   beforeDestroy () {
-    this.$sails.socket.removeAllListeners()
+    if (this.$ws.socket.getSubscription(`bot-socket:${this.$route.params.id}`)) {
+      this.$ws.socket.getSubscription(`bot-socket:${this.$route.params.id}`).close()
+      this.socket = null
+    }
   },
   methods: {
     async getStrategy () {
       this.loading = true
-      const { data: { strategy, message, errors }, status } = await this.$axios.get('/v1/strategy/view', {
-        params: {
-          id: this.$route.params.id
-        }
-      }).catch(e => e)
+      const { data: { strategy, message, errors }, status } = await this.$axios.get(`/v1/strategies/${this.$route.params.id}`).catch(e => e)
       this.loading = false
       if (this.$error(status, message, errors)) { return }
       this.strategy = strategy
     },
-    getLogs () {
-      this.logLoading = true
-      this.$sails.socket.get(
-        '/api/v1/strategy-log/get-log?strategyId=' + this.$route.params.id,
-        {
-          headers: {
-            Authorization: this.$auth.strategy.token.$storage._state['_token.local']
-          }
-        },
-        ({ logs }) => {
-          this.logLoading = false
-          this.logs = logs
-          this.$nextTick(() => {
-            if (this.autoScroll) { this.$refs.logTerminal.scrollTop = this.$refs.logTerminal.scrollHeight }
-          })
-        }
-      )
-      this.$sails.socket.on('newLog', ({ data }) => {
-        this.logs.push(data)
-        this.$nextTick(() => {
-          if (this.autoScroll) { this.$refs.logTerminal.scrollTop = this.$refs.logTerminal.scrollHeight }
-        })
-      })
-    },
-    getTrades () {
+    async getTrades () {
       this.tradesLoading = true
-      this.$sails.socket.get(
-        '/api/v1/trade/get-trade?strategyId=' + this.$route.params.id,
-        {
-          headers: {
-            Authorization: this.$auth.strategy.token.$storage._state['_token.local']
-          }
-        },
-        ({ trades }) => {
-          this.tradesLoading = false
-          this.trades = trades
-        }
-      )
-      this.$sails.socket.on('trade', ({ data }) => {
-        this.trades.push(data)
-      })
+      const { data: { trades, message, errors }, status } = await this.$axios.get(`/v1/trades/strategy/${this.$route.params.id}`).catch(e => e)
+      this.tradesLoading = false
+      if (this.$error(status, message, errors)) { return }
+      this.trades = trades
     },
-    getCoinTicks () {
-      this.$sails.socket.get(
-        '/api/v1/trade/get-ticks?strategyId=' + this.$route.params.id,
-        {
-          headers: {
-            Authorization: this.$auth.strategy.token.$storage._state['_token.local']
-          }
-        },
-        ({ ticks }) => {
-          this.ticks = ticks
-        }
-      )
-      this.$sails.socket.on('tick', ({ data }) => {
-        this.ticks.push(data)
-      })
+    async getTradeTicks () {
+      this.loading = true
+      const { data: { tradeTicks, message, errors }, status } = await this.$axios.get(`/v1/trades/get-ticks/${this.$route.params.id}`).catch(e => e)
+      this.loading = false
+      if (this.$error(status, message, errors)) { return }
+      this.ticks = tradeTicks
     },
     onResize () {
       this.cardWidth = this.$refs.card.$el.offsetWidth
     },
-    getIndicators () {
-      this.$sails.socket.get(
-        '/api/v1/trade/get-indicators?strategyId=' + this.$route.params.id,
-        {
-          headers: {
-            Authorization: this.$auth.strategy.token.$storage._state['_token.local']
-          }
-        },
-        ({ indicators }) => {
-          this.indicators = indicators
-        }
-      )
-      this.$sails.socket.on('indicator', ({ data }) => {
-        if (!this.indicators[data.name]) {
-          this.indicators[data.name] = []
-        }
-        this.indicators[data.name].push(data)
+    async getIndicators () {
+      this.loading = true
+      const { data: { indicators, message, errors }, status } = await this.$axios.get(`/v1/trades/get-indicators/${this.$route.params.id}`).catch(e => e)
+      this.loading = false
+      if (this.$error(status, message, errors)) { return }
+      this.indicators = indicators
+    },
+    setupSocketListeners () {
+      this.$ws.$on('error', (err) => {
+        this.$noty.error(err.message || 'Unknown Error')
+        this.$router.push('/strategies')
       })
+      this.$ws.$on(`bot-socket:${this.$route.params.id}|trade-ticker`, (tradeTick) => {
+        this.ticks.push(tradeTick)
+      })
+      this.$ws.$on(`bot-socket:${this.$route.params.id}|trade-indicator`, (tradeIndicator) => {
+        this.indicators[tradeIndicator.name] = { time: tradeIndicator.time, indicator: tradeIndicator.indicator }
+      })
+      this.$ws.$on(`bot-socket:${this.$route.params.id}|trade`, (trade) => {
+        this.trades.push(trade)
+      })
+      this.$ws.subscribe(`bot-socket:${this.$route.params.id}`)
     }
   }
 }

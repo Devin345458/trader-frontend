@@ -14,7 +14,6 @@ export default {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ]
   },
-
   env: {
     SOCKET_URL: process.env.SOCKET_URL
   },
@@ -72,7 +71,7 @@ export default {
     redirect: {
       login: '/',
       logout: '/',
-      home: '/dashboard'
+      home: false
     },
     watchLoggedIn: true,
     strategies: {
@@ -85,7 +84,8 @@ export default {
       }
     },
     plugins: [
-      '@/plugins/adonis-socket'
+      '@/plugins/adonis-socket',
+      '@/plugins/auth'
     ]
   },
 
@@ -121,7 +121,7 @@ export default {
       }
     },
     extend (config, ctx) {
-      config.devtool = ctx.isClient ? 'eval-source-map' : 'inline-source-map'
+      config.devtool = 'eval-source-map'
     }
   }
 }

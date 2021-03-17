@@ -104,7 +104,8 @@ export default {
       profilesLoading: false,
       indicators: [
         { text: 'Moving Average', value: 'Momentum' },
-        { text: 'Cross Over Volume Mass', value: 'CrossoverVwap' }
+        { text: 'Cross Over Volume Weight Moving Average', value: 'CrossoverVwap' },
+        { text: 'Cross Over VWMA EMA', value: 'CrossoverVwapEma' }
       ],
       types: [
         { text: 'Development - Paper Trading', value: 'Paper' },

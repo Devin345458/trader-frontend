@@ -11,7 +11,7 @@ class WsPlugin extends Vue {
   }
 
   anyListener (topic, event, data) {
-    // console.log('WS_EVENTS', ...arguments)
+    console.log('WS_EVENTS', ...arguments)
     this.$emitToFront(`${topic}|${event}`, data)
     this.$emitToFront(`${event}`, data)
   }

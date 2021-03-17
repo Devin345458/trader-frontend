@@ -164,17 +164,26 @@ export default {
       })
 
       this.socket.on('message', ({ type, data }) => {
-        console.log(type, data)
-        if (type === 'trade') { this.trades.push(data) }
+        if (type === 'order') { this.trades.push(data) }
         if (type === 'ticks') {
           this.loading = false
           this.candles = this.candles.concat(data)
         }
         if (type === 'indicator') {
-          if (!this.indicators[data.name]) {
-            this.indicators[data.name] = []
+          const indicators = {}
+          data.forEach((indicator) => {
+            if (!indicators[indicator.name]) {
+              indicators[indicator.name] = []
+            }
+            indicators[indicator.name].push({ time: indicator.time, indicator: indicator.indicator })
+          })
+
+          for (const key in indicators) {
+            if (!this.indicators[key]) {
+              this.indicators[key] = []
+            }
+            this.indicators[key] = this.indicators[key].concat(indicators[key])
           }
-          this.indicators[data.name].push({ time: data.time, indicator: data.indicator })
         }
         if (type === 'error') {
           this.$noty.error(data.message)

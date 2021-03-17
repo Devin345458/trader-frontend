@@ -4,6 +4,12 @@
       <v-card-title>
         Genetic Training Settings
         <v-spacer />
+        <p v-if="profitPercentage !== undefined" class="mr-2 mb-0">
+          Profit Percentage: {{ profitPercentage.toFixed(2) }}%
+        </p>
+        <p v-if="bestPNL !== undefined" class="mr-2 mb-0">
+          Best PNL: ${{ formatPrice(bestPNL) }}
+        </p>
         <v-icon @click="internal_value = false">
           mdi-close
         </v-icon>
@@ -66,7 +72,9 @@ export default {
         { text: 'Iteration', value: 'iteration' },
         { text: 'Best Value', value: 'best_value' }
       ],
-      bestOptions: false
+      bestOptions: false,
+      bestPNL: undefined,
+      profitPercentage: undefined
     }
   },
   computed: {
@@ -96,11 +104,19 @@ export default {
       this.internal_value = false
     })
 
-    this.$ws.$on('message', (data) => {
-      this.results.unshift(data)
-      if (this.results.length === this.iterations) {
-        this.loading = false
-        this.bestOptions = data.best_options
+    this.$ws.$on('message', ({ type, data }) => {
+      switch (type) {
+        case 'iteration':
+          this.results.unshift(data)
+          if (this.results.length === this.iterations) {
+            this.loading = false
+            this.bestOptions = data.best_options
+            this.profitPercentage = (((data.best_value + this.initial_balance) / this.initial_balance) - 1) * 100
+          }
+          break
+        case 'best':
+          this.bestPNL = data
+          break
       }
     })
   },
@@ -122,15 +138,23 @@ export default {
     edit () {
       this.results = []
       this.bestOptions = false
+      this.bestPNL = undefined
+      this.profitPercentage = undefined
     },
     clear () {
       this.loading = false
       this.results = []
       this.bestOptions = false
-      if (this.$ws.socket.getSubscription('strategy:evolution-' + this.strategy.id)) {
-        this.$ws.socket.getSubscription('strategy:evolution-' + this.strategy.id).close()
+      this.bestPNL = undefined
+      this.profitPercentage = undefined
+      if (this.$ws.socket.getSubscription(`strategy:evolution-${this.strategy.id}`)) {
+        this.$ws.socket.getSubscription(`strategy:evolution-${this.strategy.id}`).close()
         this.socket = null
       }
+    },
+    formatPrice (value) {
+      const val = (value / 1).toFixed(2)
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     }
   }
 }

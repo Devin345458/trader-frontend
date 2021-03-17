@@ -1,6 +1,6 @@
 <template>
   <span>
-    <v-sheet v-if="noApi" color="info">
+    <v-sheet v-if="noProfiles" color="info">
       <v-container>
         <v-row>
           <div>
@@ -8,8 +8,8 @@
             <v-card-title>Ready to start trading?</v-card-title>
           </div>
           <v-spacer />
-          <v-btn color="primary" class="ma-auto" to="settings">
-            Enter Api Credentials
+          <v-btn color="primary" class="ma-auto" to="profiles/add">
+            Create first profile
           </v-btn>
         </v-row>
       </v-container>
@@ -27,8 +27,8 @@
 export default {
   name: 'Dashboard',
   computed: {
-    noApi () {
-      return !this.user.coinBaseApiKey || !this.user.coinBaseApiSecret
+    noProfiles () {
+      return !this.user.profiles.length
     }
   },
   head () {
