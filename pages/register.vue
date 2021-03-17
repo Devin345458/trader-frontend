@@ -59,15 +59,15 @@ export default {
     async login () {
       if (!this.$refs.form.validate()) { return }
       this.loading = true
-      const { data: { message, problems }, status } = await this.$axios.post('/v1/user/register', {
-        firstName: this.first_name,
-        lastName: this.last_name,
+      const { data: { message, problems }, status } = await this.$axios.post('/v1/users', {
+        first_name: this.first_name,
+        last_name: this.last_name,
         email: this.email,
         password: this.password
       }).catch(e => e)
       this.loading = false
       if (this.$error(status, message, problems)) { return }
-      this.registered = true
+      this.$router.push('/')
     }
   }
 }
