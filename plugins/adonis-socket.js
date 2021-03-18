@@ -126,7 +126,7 @@ function connect (token) {
     Vue.ws.disconnect()
     Vue.ws.connect(
       {
-        wsDomain: 'ws://' + process.env.SOCKET_URL,
+        wsDomain: process.env.SOCKET_URL,
         jwtToken: token
       },
       {
