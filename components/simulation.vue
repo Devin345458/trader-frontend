@@ -7,7 +7,7 @@
         <template v-if="best">
           Best P&L ${{ formatPrice(best) }}
         </template>
-        <template v-if="trades">
+        <template v-if="trades.length">
           P&L ${{ formatPrice(totalPNL) }}
         </template>
         <v-icon @click="internal_value = false">
@@ -102,7 +102,7 @@ export default {
       chart: null,
       cardWidth: 500,
       socket: null,
-      best: 0
+      best: false
     }
   },
   computed: {
@@ -205,7 +205,7 @@ export default {
         this.socket.close()
         this.socket = null
       }
-      this.best = 0
+      this.best = false
     },
     formatPrice (value) {
       const val = (value / 1).toFixed(2)
