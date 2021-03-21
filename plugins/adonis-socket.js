@@ -88,9 +88,6 @@ class WsPlugin extends Vue {
   }
 
   unsubscribe (topic) {
-    if (this.socket.subscriptions[topic]) {
-      console.log('Found Socket')
-    }
     this.socket.subscriptions[topic].close()
   }
 
@@ -113,6 +110,7 @@ class WsPlugin extends Vue {
       }
       this.connected = false
     } catch (e) {
+      // eslint-disable-next-line
       console.error('AdonisVueWs', e.message)
     }
   }
@@ -151,6 +149,7 @@ function connect (app, token) {
       }
     )
   } catch (e) {
+    // eslint-disable-next-line
     console.log(e)
   }
 }

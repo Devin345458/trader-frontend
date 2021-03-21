@@ -154,7 +154,6 @@ export default {
       })
 
       this.socket.on('error', (err) => {
-        console.log(err)
         this.$noty.error(err.message || 'Unknown Error')
         this.internal_value = false
       })

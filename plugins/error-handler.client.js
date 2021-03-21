@@ -22,6 +22,7 @@ export default (context, inject) => {
 
   if (process.env.NODE_ENV === 'development') {
     Vue.config.errorHandler = (err, vm, info, ...rest) => {
+      // eslint-disable-next-line
       console.error(err.message, info)
     }
   }
