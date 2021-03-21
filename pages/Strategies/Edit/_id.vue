@@ -9,19 +9,15 @@
       @simulate="simulationModal = true"
       @genetic="geneticModal = true"
     />
-    <simulation v-model="simulationModal" :strategy="strategy" />
-    <genetic v-model="geneticModal" :strategy="strategy" @setOptions="setOptions" />
   </v-container>
 </template>
 
 <script>
 import validations from '~/mixins/validations'
 import StrategyForm from '~/components/strategy/form'
-import Simulation from '~/components/simulation'
-import Genetic from '~/components/genetic'
 export default {
   name: 'Edit',
-  components: { Genetic, StrategyForm, Simulation },
+  components: { StrategyForm },
   mixins: [validations],
   data () {
     return {

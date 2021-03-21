@@ -1,20 +1,23 @@
 <template>
-  <v-dialog v-model="internal_value" persistent width="80%">
+  <v-dialog ref="dialog" v-model="value" persistent width="80%">
+    <template v-slot:activator="{on, attrs}">
+      <slot name="activator" v-bind="{on, attrs}" />
+    </template>
     <v-card ref="card" :loading="loading">
       <v-card-title>
         Genetic Training Settings
         <v-spacer />
-        <p v-if="profitPercentage !== undefined" class="mr-2 mb-0">
+        <p v-if="profitPercentage !== false" class="mr-2 mb-0">
           Profit Percentage: {{ profitPercentage.toFixed(2) }}%
         </p>
-        <p v-if="bestPNL !== undefined" class="mr-2 mb-0">
+        <p v-if="bestPNL" class="mr-2 mb-0">
           Best PNL: ${{ formatPrice(bestPNL) }}
         </p>
-        <v-icon @click="internal_value = false">
+        <v-icon @click="close">
           mdi-close
         </v-icon>
       </v-card-title>
-      <v-card-text v-if="!results.length">
+      <v-card-text v-if="!internalGeneticRun">
         <v-form ref="genetic">
           <v-text-field v-model="number_of_days" type="number" label="Number of days to run sim" />
           <v-currency-field v-model="initial_balance" prefix="$" label="Initial Balance" />
@@ -24,23 +27,29 @@
       </v-card-text>
       <v-card-text v-else>
         <v-data-table
-          :items="results"
+          :items="internalGeneticRun.genetic_run_iterations"
           :headers="headers"
-        />
+        >
+          <template v-slot:item.profit_loss="{item}">
+            {{ formatPrice(item.profit_loss) }}
+          </template>
+        </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="results.length" color="error" @click="internal_value = false">
+        <v-btn v-if="internalGeneticRun" color="error" @click="value = false">
           Close
         </v-btn>
         <v-spacer />
-        <v-btn v-if="!results.length" color="primary" :loading="loading" @click="runGeneticEvolution">
+        <v-btn v-if="!internalGeneticRun" color="primary" :loading="loading" @click="runGeneticEvolution">
           Run Genetic Evolution
         </v-btn>
-        <v-btn v-if="bestOptions" color="primary" @click="$emit('setOptions', bestOptions)">
+        <v-btn
+          v-if="internalGeneticRun.genetic_run_iterations && internalGeneticRun.genetic_run_iterations.length"
+          color="primary"
+          :loading="setBestOptionsLoading"
+          @click="setBestOptions"
+        >
           Set Options From Best Run
-        </v-btn>
-        <v-btn v-if="results.length === iterations" color="primary" @click="edit">
-          Edit
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -51,110 +60,110 @@
 export default {
   name: 'Genetic',
   props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
     strategy: {
       type: Object,
-      required: true
+      required: false,
+      default: () => {}
+    },
+    geneticRun: {
+      type: Object,
+      required: false,
+      default: () => {}
     }
   },
   data () {
     return {
+      value: false,
       loading: false,
+      setBestOptionsLoading: false,
+
       initial_balance: 10000,
       number_of_days: 1,
       iterations: 10,
       populationSize: 10,
-      results: [],
+
       headers: [
         { text: 'Iteration', value: 'iteration' },
-        { text: 'Best Value', value: 'best_value' }
+        { text: 'Best Value', value: 'profit_loss' }
       ],
-      bestOptions: false,
-      bestPNL: undefined,
-      profitPercentage: undefined
+      running: false,
+      internalGeneticRun: false
     }
   },
   computed: {
-    internal_value: {
-      get () {
-        return this.value
-      },
-      set (val) {
-        this.$emit('input', val)
-      }
+    profitPercentage () {
+      if (!this.internalGeneticRun.genetic_run_iterations || !this.internalGeneticRun.genetic_run_iterations.length) { return false }
+      const change = this.internalGeneticRun.genetic_run_iterations[0].profit_loss
+      return ((change + this.initial_balance) / this.initial_balance - 1) * 100
+    },
+    bestPNL () {
+      return this.internalGeneticRun.perfect
     }
   },
-  watch: {
-    internal_value (val) {
-      if (!val) {
-        this.clear()
-      }
+  created () {
+    if (this.geneticRun) {
+      this.internalGeneticRun = this.geneticRun
     }
-  },
-  mounted () {
-    this.$ws.$on('error', (err) => {
-      this.$noty.error(err.message || 'Unknown Error')
-      this.internal_value = false
-    })
-
-    this.$ws.$on('close', () => {
-      this.internal_value = false
-    })
-
-    this.$ws.$on('message', ({ type, data }) => {
-      switch (type) {
-        case 'iteration':
-          this.results.unshift(data)
-          if (this.results.length === this.iterations) {
-            this.loading = false
-            this.bestOptions = data.best_options
-            this.profitPercentage = (((data.best_value + this.initial_balance) / this.initial_balance) - 1) * 100
-          }
-          break
-        case 'best':
-          this.bestPNL = data
-          break
-      }
-    })
-  },
-  beforeDestroy () {
-    this.clear()
   },
   methods: {
-    runGeneticEvolution () {
+    async runGeneticEvolution () {
       if (!this.$refs.genetic.validate()) { return }
       this.loading = true
-      this.$ws.$emitToServer('strategy:evolution-' + this.strategy.id, 'runGenetic', {
+      this.running = true
+      const { data: { geneticRun, message, errors }, status } = await this.$axios.post('/v1/genetic-runs/start', {
         initialBalance: this.initial_balance,
         numberOfDays: this.number_of_days,
         iterations: this.iterations,
         populationSize: this.populationSize,
         strategy: this.strategy
-      })
+      }).catch(e => e)
+      if (this.$error(status, message, errors)) { return }
+      geneticRun.genetic_run_iterations = []
+      this.internalGeneticRun = geneticRun
+      this.setUpListeners()
     },
-    edit () {
-      this.results = []
-      this.bestOptions = false
-      this.bestPNL = undefined
-      this.profitPercentage = undefined
+    close () {
+      this.value = false
+      this.clear()
     },
     clear () {
-      this.loading = false
-      this.results = []
-      this.bestOptions = false
-      this.bestPNL = undefined
-      this.profitPercentage = undefined
-      if (this.$ws.socket.getSubscription(`strategy:evolution-${this.strategy.id}`)) {
-        this.$ws.socket.getSubscription(`strategy:evolution-${this.strategy.id}`).close()
-        this.socket = null
+      if (!this.geneticRun) {
+        this.internalGeneticRun = false
+        this.loading = false
+        if (this.$ws.socket.getSubscription(`genetic-run:${this.geneticId}`)) {
+          this.$ws.socket.getSubscription(`genetic-run:${this.geneticId}`).close()
+        }
       }
     },
     formatPrice (value) {
       const val = (value / 1).toFixed(2)
       return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    },
+    setUpListeners () {
+      this.$ws.$on('error', () => {
+        this.value = false
+      })
+
+      this.$ws.$on('close', () => {
+        if (this.running) {
+          this.clear()
+        }
+      })
+
+      this.$ws.$on(`genetic-run:${this.internalGeneticRun.id}|iteration`, (iteration) => {
+        this.internalGeneticRun.genetic_run_iterations.unshift(iteration)
+        if (this.internalGeneticRun.genetic_run_iterations.length === this.internalGeneticRun.iterations) {
+          this.loading = false
+        }
+      })
+
+      this.$ws.subscribe(`genetic-run:${this.internalGeneticRun.id}`)
+    },
+    async setBestOptions () {
+      this.setBestOptionsLoading = true
+      const { data: { message, errors }, status } = await this.$axios.post('/v1/strategies/set-options/' + this.internalGeneticRun.strategy_id, this.internalGeneticRun.genetic_run_iterations[0].options).catch(e => e)
+      this.setBestOptionsLoading = false
+      this.$error(status, message, errors)
     }
   }
 }

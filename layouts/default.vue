@@ -3,7 +3,7 @@
     <v-navigation-drawer
       v-model="drawer"
       fixed
-      color="#121D27"
+      :color="$vuetify.theme.dark? '#121D27' : '#F5F6F8'"
       app
     >
       <v-list>
@@ -40,10 +40,13 @@
     <v-app-bar
       fixed
       app
-      color="#060D13"
+      :color="$vuetify.theme.dark? '#121D27' : '#F5F6F8'"
     >
       <v-toolbar-title v-text="title" />
       <v-spacer />
+      <v-icon @click="toggleDarkMode">
+        mdi-brightness-6
+      </v-icon>
     </v-app-bar>
     <v-main>
       <nuxt />
@@ -98,6 +101,9 @@ export default {
   methods: {
     async logout () {
       await this.$auth.logout()
+    },
+    toggleDarkMode () {
+      this.$vuetify.theme.dark = !this.$vuetify.theme.dark
     }
   }
 }

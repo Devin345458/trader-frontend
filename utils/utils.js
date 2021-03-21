@@ -1,3 +1,5 @@
+import get from 'lodash.get'
+
 export const removeNumberFromArray = (array, key) => {
   if (!array.includes(key)) { return }
   return array.splice(array.indexOf(key), 1)
@@ -33,6 +35,15 @@ export const removeItemsByFieldFromArray = (field, array, keys) => {
     array = removeItemByFieldFromArray(field, array, key)
   })
   return array
+}
+
+export const replaceItemByFieldToArray = (field, array, data) => {
+  const tmp = array.map(item => get(item, field))
+  if (!tmp.includes(get(data, field))) {
+    array.unshift(data)
+    return
+  }
+  array.splice(tmp.indexOf(get(data, field)), 1, data)
 }
 
 export function currency (value) {

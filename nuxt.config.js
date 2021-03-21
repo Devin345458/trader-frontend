@@ -14,6 +14,7 @@ export default {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ]
   },
+  target: 'static',
   env: {
     SOCKET_URL: process.env.SOCKET_URL
   },
@@ -64,7 +65,7 @@ export default {
   ],
 
   router: {
-    middleware: ['auth']
+    middleware: ['auth', 'disconnectSockets']
   },
 
   auth: {

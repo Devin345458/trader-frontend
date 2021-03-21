@@ -11,7 +11,6 @@ class WsPlugin extends Vue {
   }
 
   anyListener (topic, event, data) {
-    console.log('WS_EVENTS', ...arguments)
     this.$emitToFront(`${topic}|${event}`, data)
     this.$emitToFront(`${event}`, data)
   }
@@ -88,6 +87,23 @@ class WsPlugin extends Vue {
     return subscription
   }
 
+  unsubscribe (topic) {
+    if (this.socket.subscriptions[topic]) {
+      console.log('Found Socket')
+    }
+    this.socket.subscriptions[topic].close()
+  }
+
+  pageChange (noty) {
+    this.$off()
+    for (const key in this.socket.subscriptions) {
+      this.unsubscribe(key)
+    }
+    this.$on('error', (err) => {
+      noty.error(err.message || 'Unknown Error')
+    })
+  }
+
   disconnect () {
     try {
       if (this.socket) {
@@ -106,25 +122,24 @@ class WsPlugin extends Vue {
   }
 }
 
-export default function ({ $auth }, inject) {
-  Vue.ws = new WsPlugin(Ws)
-  Vue.prototype.$ws = Vue.ws
+export default function ({ app, $auth }, inject) {
+  inject('ws', new WsPlugin(Ws))
   if ($auth.loggedIn) {
-    connect($auth.strategy.token.get())
+    connect(app, $auth.strategy.token.get())
   }
   $auth.$storage.watchState('loggedIn', (loggedIn) => {
     if (loggedIn) {
-      connect($auth.strategy.token.get())
+      connect(app, $auth.strategy.token.get())
     } else {
-      Vue.ws.disconnect()
+      app.$ws.disconnect()
     }
   })
 }
 
-function connect (token) {
+function connect (app, token) {
   try {
-    Vue.ws.disconnect()
-    Vue.ws.connect(
+    app.$ws.disconnect()
+    app.$ws.connect(
       {
         wsDomain: process.env.SOCKET_URL,
         jwtToken: token

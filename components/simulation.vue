@@ -5,10 +5,10 @@
         Simulation Settings
         <v-spacer />
         <template v-if="best">
-          Best P&L {{ best }}
+          Best P&L ${{ formatPrice(best) }}
         </template>
         <template v-if="trades">
-          P&L {{ totalPNL }}
+          P&L ${{ formatPrice(totalPNL) }}
         </template>
         <v-icon @click="internal_value = false">
           mdi-close
@@ -203,11 +203,14 @@ export default {
       this.indicators = {}
       this.loading = false
       if (this.socket) {
-        console.log('socket close')
         this.socket.close()
         this.socket = null
       }
       this.best = 0
+    },
+    formatPrice (value) {
+      const val = (value / 1).toFixed(2)
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     }
   }
 }

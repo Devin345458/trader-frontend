@@ -3,7 +3,6 @@
     <v-card-title>Edit {{ strategy.name }} Strategy</v-card-title>
     <v-card-text>
       <v-form ref="form">
-        <v-checkbox v-model="strategy.enabled" label="Enabled" />
         <v-select v-model="strategy.type" :items="types" label="Trade Type" :rules="rules.required" @change="strategy.profile_id = null" />
         <v-text-field v-model="strategy.name" label="Strategy Name" :rules="rules.required" />
         <v-select
@@ -62,12 +61,6 @@
       </v-form>
     </v-card-text>
     <v-card-actions>
-      <v-btn v-if="edit" color="accent" @click="$emit('simulate')">
-        Run Simulation
-      </v-btn>
-      <v-btn v-if="edit" color="accent" @click="$emit('genetic')">
-        Run Genetic Evolution
-      </v-btn>
       <v-spacer />
       <v-btn color="primary" :loading="loading" @click="$emit('save')">
         <v-icon v-if="!edit">

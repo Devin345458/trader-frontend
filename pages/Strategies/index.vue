@@ -21,7 +21,7 @@
             <v-btn color="primary" icon :to="'/strategies/edit/' + item.id">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
-            <v-btn color="error" icon @click="deleteStrat(item.id)">
+            <v-btn color="error" icon @click="deleteStrategy(item.id)">
               <v-icon>mdi-trash-can</v-icon>
             </v-btn>
           </template>
@@ -57,10 +57,7 @@ export default {
     this.strategies = strategies
   },
   methods: {
-    edit (id) {
-      this.$router.push('/strategies/edit/' + id)
-    },
-    async deleteStrat (id) {
+    async deleteStrategy (id) {
       if (await this.$confirm('Do you really want to delete this strategy?', { title: 'Danger Zone', icon: 'mdi-alert-circle-outline', color: 'error' })) {
         this.$nuxt.$loading.start()
         const { data: { message, problems }, status } = await this.$axios.delete('/v1/strategies/' + id).catch(e => e)
