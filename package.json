@@ -5,13 +5,14 @@
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
-    "start": "nuxt start",
+    "start": "nuxt start --quiet",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "lint": "npm run lint:js"
   },
   "dependencies": {
     "@adonisjs/websocket-client": "^1.0.9",
+    "@mdi/font": "^5.8.55",
     "@nuxt/webpack": "^2.14.12",
     "@nuxtjs/auth-next": "latest",
     "@nuxtjs/axios": "^5.12.2",
