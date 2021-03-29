@@ -98,7 +98,6 @@ export default {
         { text: 'Price', value: 'price' },
         { text: 'P&L', value: 'profitLoss' }
       ],
-      chartData: [],
       chart: null,
       cardWidth: 500,
       socket: null,
@@ -163,7 +162,7 @@ export default {
       })
 
       this.socket.on('message', ({ type, data }) => {
-        if (type === 'order') { this.trades.push(data) }
+        if (type === 'order') { this.trades = this.trades.concat(data) }
         if (type === 'ticks') {
           this.loading = false
           this.candles = this.candles.concat(data)

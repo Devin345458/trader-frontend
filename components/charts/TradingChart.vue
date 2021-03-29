@@ -86,6 +86,12 @@ export default {
         this.updateChart()
       },
       deep: true
+    },
+    trades: {
+      handler () {
+        this.updateChart()
+      },
+      immediate: true
     }
   },
   methods: {
@@ -110,6 +116,7 @@ export default {
             type: 'Trades',
             data: this.chartTrades,
             settings: {
+              color: '#f9ff14',
               legend: false,
               'z-index': 5
             }
