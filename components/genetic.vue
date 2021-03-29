@@ -36,7 +36,7 @@
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="internalGeneticRun" color="error" @click="value = false">
+        <v-btn v-if="internalGeneticRun" color="error" @click="close">
           Close
         </v-btn>
         <v-spacer />

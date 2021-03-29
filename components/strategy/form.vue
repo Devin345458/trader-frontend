@@ -99,7 +99,8 @@ export default {
         { text: 'Momentum', value: 'Momentum' },
         { text: 'Cross Over Volume Weight Moving Average', value: 'CrossoverVwap' },
         { text: 'Cross Over VWMA EMA', value: 'CrossoverVwapEma' },
-        { text: 'Moving Average', value: 'MovingAverage' }
+        { text: 'Moving Average', value: 'MovingAverage' },
+        { text: 'Relative Strength Index', value: 'RelativeStrengthIndex' }
       ],
       types: [
         { text: 'Development - Paper Trading', value: 'Paper' },
