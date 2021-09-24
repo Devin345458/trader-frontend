@@ -132,10 +132,6 @@ export default {
   watch: {
     'strategy.indicator' () {
       this.getOptions()
-    },
-    'strategy.type' () {
-      this.loadCoins()
-      this.loadProfiles()
     }
   },
   mounted () {
@@ -147,7 +143,7 @@ export default {
     async loadCoins () {
       const paper = this.strategy.type === 'Paper'
       this.coinsLoading = true
-      const { data: { coins, message }, status } = await this.$axios.get(`/v1/coinbase/coins/${paper}`).catch(e => e)
+      const { data: { coins, message }, status } = await this.$axios.get(`/coinbase/coins/${paper}`).catch(e => e)
       this.coinsLoading = false
       if (this.$error(status, message)) { return }
       this.coins = coins
@@ -155,7 +151,7 @@ export default {
     async loadProfiles () {
       if (!this.strategy.type) { return }
       this.profilesLoading = true
-      const { data: { profiles, message }, status } = await this.$axios.get(`/v1/profiles/${this.strategy.type}`).catch(e => e)
+      const { data: { profiles, message }, status } = await this.$axios.get(`/profiles/${this.strategy.type}`).catch(e => e)
       this.profilesLoading = false
       if (this.$error(status, message)) { return }
       this.profiles = profiles
@@ -163,7 +159,7 @@ export default {
     async getOptions () {
       if (!this.strategy.indicator) { return }
       this.loading = true
-      const { data: { options, message, errors }, status } = await this.$axios.get('/v1/strategies/options/' + this.strategy.indicator).catch(e => e)
+      const { data: { options, message, errors }, status } = await this.$axios.get('/strategies/options/' + this.strategy.indicator).catch(e => e)
       this.loading = false
       if (this.$error(status, message, errors)) { return }
       this.options = options

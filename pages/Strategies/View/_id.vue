@@ -211,21 +211,21 @@ export default {
   methods: {
     async getStrategy () {
       this.loading = true
-      const { data: { strategy, message, errors }, status } = await this.$axios.get(`/v1/strategies/${this.$route.params.id}`).catch(e => e)
+      const { data: { strategy, message, errors }, status } = await this.$axios.get(`/strategies/${this.$route.params.id}`).catch(e => e)
       this.loading = false
       if (this.$error(status, message, errors)) { return }
       this.strategy = strategy
     },
     async getTrades () {
       this.tradesLoading = true
-      const { data: { trades, message, errors }, status } = await this.$axios.get(`/v1/trades/strategy/${this.$route.params.id}`).catch(e => e)
+      const { data: { trades, message, errors }, status } = await this.$axios.get(`/trades/strategy/${this.$route.params.id}`).catch(e => e)
       this.tradesLoading = false
       if (this.$error(status, message, errors)) { return }
       this.trades = trades
     },
     async getTradeTicks () {
       this.loading = true
-      const { data: { tradeTicks, message, errors }, status } = await this.$axios.get(`/v1/trades/get-ticks/${this.$route.params.id}`).catch(e => e)
+      const { data: { tradeTicks, message, errors }, status } = await this.$axios.get(`/trades/get-ticks/${this.$route.params.id}`).catch(e => e)
       this.loading = false
       if (this.$error(status, message, errors)) { return }
       this.ticks = tradeTicks
@@ -235,7 +235,7 @@ export default {
     },
     async getIndicators () {
       this.loading = true
-      const { data: { indicators, message, errors }, status } = await this.$axios.get(`/v1/trades/get-indicators/${this.$route.params.id}`).catch(e => e)
+      const { data: { indicators, message, errors }, status } = await this.$axios.get(`/trades/get-indicators/${this.$route.params.id}`).catch(e => e)
       this.loading = false
       if (this.$error(status, message, errors)) { return }
       this.indicators = indicators
@@ -261,21 +261,21 @@ export default {
     },
     async stopStrategy () {
       this.enableLoading = true
-      const { data: { message, errors }, status } = await this.$axios.put(`/v1/strategies/stop/${this.$route.params.id}`).catch(e => e)
+      const { data: { message, errors }, status } = await this.$axios.put(`/strategies/stop/${this.$route.params.id}`).catch(e => e)
       this.enableLoading = false
       if (this.$error(status, message, errors)) { return }
       this.strategy.enabled = false
     },
     async startStrategy () {
       this.enableLoading = true
-      const { data: { message, errors }, status } = await this.$axios.put(`/v1/strategies/start/${this.$route.params.id}`).catch(e => e)
+      const { data: { message, errors }, status } = await this.$axios.put(`/strategies/start/${this.$route.params.id}`).catch(e => e)
       this.enableLoading = false
       if (this.$error(status, message, errors)) { return }
       this.strategy.enabled = false
     },
     async getGeneticRuns () {
       this.geneticLoading = true
-      const { data: { runs, message, errors }, status } = await this.$axios.get(`/v1/genetic-runs/strategy/${this.$route.params.id}`).catch(e => e)
+      const { data: { runs, message, errors }, status } = await this.$axios.get(`/genetic-runs/strategy/${this.$route.params.id}`).catch(e => e)
       this.geneticLoading = false
       if (this.$error(status, message, errors)) { return }
       this.geneticRuns = runs
@@ -283,7 +283,7 @@ export default {
     async deleteGeneticRun (id) {
       const tmp = this.geneticRuns.map(item => item.id)
       const holding = this.geneticRuns.splice(tmp.indexOf(id), 1)[0]
-      const { data: { message, errors }, status } = await this.$axios.delete('/v1/genetic-runs/delete/' + id).catch(e => e)
+      const { data: { message, errors }, status } = await this.$axios.delete('/genetic-runs/delete/' + id).catch(e => e)
       if (this.$error(status, message, errors)) {
         this.geneticRuns.splice(tmp.indexOf(id), 0, holding)
       }

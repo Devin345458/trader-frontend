@@ -36,7 +36,7 @@ export default {
     async save () {
       if (!this.$refs.form.validate()) { return }
       this.loading = true
-      const { data: { strategyId, message, errors }, status } = await this.$axios.patch('/v1/strategies', {
+      const { data: { strategyId, message, errors }, status } = await this.$axios.patch('/strategies', {
         ...this.strategy
       }).catch(e => e)
       this.loading = false
@@ -45,7 +45,7 @@ export default {
     },
     async getStrategy () {
       this.loading = true
-      const { data: { strategy, message, errors }, status } = await this.$axios.get('/v1/strategies/' + this.$route.params.id).catch(e => e)
+      const { data: { strategy, message, errors }, status } = await this.$axios.get('/strategies/' + this.$route.params.id).catch(e => e)
       this.loading = false
       if (this.$error(status, message, errors)) { return }
       this.strategy = strategy

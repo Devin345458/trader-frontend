@@ -16,7 +16,7 @@
         :headers="headers"
         :items="profiles"
       >
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <v-btn
             icon
             color="primary"
@@ -45,7 +45,6 @@ export default {
       loading: true,
       headers: [
         { text: 'Name', value: 'name' },
-        { text: 'Type', value: 'type' },
         { text: 'Actions', value: 'actions' }
       ],
       profiles: []
@@ -53,7 +52,7 @@ export default {
   },
   async mounted () {
     this.loading = true
-    const { data: { profiles, message, errors }, status } = await this.$axios.get('/v1/profiles', {}).catch(e => e)
+    const { data: { profiles, message, errors }, status } = await this.$axios.get('/profiles', {}).catch(e => e)
     this.loading = false
     if (this.$error(status, message, errors)) { return }
     this.profiles = profiles

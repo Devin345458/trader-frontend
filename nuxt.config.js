@@ -1,5 +1,4 @@
 import colors from 'vuetify/es5/util/colors'
-
 export default {
   // Global page headers (https://go.nuxtjs.dev/config-head)
   head: {
@@ -77,14 +76,14 @@ export default {
     strategies: {
       local: {
         endpoints: {
-          login: { url: process.env.BASE_URL + '/v1/users/login', method: 'POST', propertyName: 'token', credentials: true },
-          logout: { url: process.env.BASE_URL + '/v1/users/logout', method: 'POST' },
-          user: { url: process.env.BASE_URL + '/v1/users/logged-in-user', method: 'GET', propertyName: 'user' }
+          login: { url: process.env.BASE_URL + '/users/login', method: 'POST', propertyName: 'token', credentials: true },
+          logout: { url: process.env.BASE_URL + '/users/logout', method: 'POST' },
+          user: { url: process.env.BASE_URL + '/users/logged-in-user', method: 'GET', propertyName: 'user' }
         }
       }
     },
     plugins: [
-      '@/plugins/adonis-socket',
+      // '@/plugins/adonis-socket',
       '@/plugins/auth'
     ]
   },
@@ -120,7 +119,7 @@ export default {
         overlay: false
       }
     },
-    extend (config, ctx) {
+    extend (config) {
       config.devtool = 'eval-source-map'
     }
   }

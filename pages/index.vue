@@ -55,10 +55,10 @@ export default {
         return
       }
       if (this.$route.query.redirect && this.$route.query.redirect !== '/login') {
-        this.$router.push(this.$route.query.redirect)
+        await this.$router.push(this.$route.query.redirect)
         return
       }
-      this.$router.push('/dashboard')
+      await this.$router.push('/dashboard')
     }
   }
 }

@@ -18,7 +18,7 @@ export default {
     }
   },
   async mounted () {
-    const { data: { success, message } } = await this.$axios.post('/v1/user/confirm-email', {
+    const { data: { success, message } } = await this.$axios.post('/user/confirm-email', {
       token: this.findGetParameter('token')
     }).catch(e => e)
     if (!success) {

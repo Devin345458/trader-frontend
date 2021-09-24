@@ -51,7 +51,7 @@ export default {
   },
   async mounted () {
     this.loading = true
-    const { data: { strategies, message, problems }, status } = await this.$axios.get('/v1/strategies', {}).catch(e => e)
+    const { data: { strategies, message, problems }, status } = await this.$axios.get('/strategies', {}).catch(e => e)
     this.loading = false
     if (this.$error(status, message, problems)) { return }
     this.strategies = strategies
@@ -60,7 +60,7 @@ export default {
     async deleteStrategy (id) {
       if (await this.$confirm('Do you really want to delete this strategy?', { title: 'Danger Zone', icon: 'mdi-alert-circle-outline', color: 'error' })) {
         this.$nuxt.$loading.start()
-        const { data: { message, problems }, status } = await this.$axios.delete('/v1/strategies/' + id).catch(e => e)
+        const { data: { message, problems }, status } = await this.$axios.delete('/strategies/' + id).catch(e => e)
         this.$nuxt.$loading.finish()
         if (this.$error(status, message, problems)) { return }
         this.$noty.success('Successfully Deleted Strategy')

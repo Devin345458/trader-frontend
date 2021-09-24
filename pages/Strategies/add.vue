@@ -27,7 +27,7 @@ export default {
     async save () {
       if (!this.$refs.form.validate()) { return }
       this.loading = true
-      const { data: { strategy, message, errors }, status } = await this.$axios.post('/v1/strategies', {
+      const { data: { strategy, message, errors }, status } = await this.$axios.post('/strategies', {
         ...this.strategy
       }).catch(e => e)
       this.loading = false

@@ -37,7 +37,7 @@ export default {
     async editUser () {
       if (!this.$refs.form.validate()) { return }
       this.loading = true
-      const { data: { user, message, problems }, status } = await this.$axios.patch('/v1/users', {
+      const { data: { user, message, problems }, status } = await this.$axios.patch('/users', {
         ...this.editedUser
       }).catch(e => e)
       this.loading = false

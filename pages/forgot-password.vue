@@ -30,8 +30,8 @@
 import validations from '~/mixins/validations'
 export default {
   name: 'Login',
-  layout: 'login',
   mixins: [validations],
+  layout: 'login',
   data () {
     return {
       email: null,
@@ -46,7 +46,7 @@ export default {
     async login () {
       if (!this.$refs.form.validate()) { return }
       this.loading = true
-      const { data: { message, errors }, status } = await this.$axios.post('/v1/users/register', {
+      const { data: { message, errors }, status } = await this.$axios.post('/users/register', {
         first_name: this.first_name,
         last_name: this.last_name,
         terms: this.terms,

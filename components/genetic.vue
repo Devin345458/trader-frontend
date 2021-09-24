@@ -110,7 +110,7 @@ export default {
       if (!this.$refs.genetic.validate()) { return }
       this.loading = true
       this.running = true
-      const { data: { geneticRun, message, errors }, status } = await this.$axios.post('/v1/genetic-runs/start', {
+      const { data: { geneticRun, message, errors }, status } = await this.$axios.post('/genetic-runs/start', {
         initialBalance: this.initial_balance,
         numberOfDays: this.number_of_days,
         iterations: this.iterations,
@@ -161,7 +161,7 @@ export default {
     },
     async setBestOptions () {
       this.setBestOptionsLoading = true
-      const { data: { message, errors }, status } = await this.$axios.post('/v1/strategies/set-options/' + this.internalGeneticRun.strategy_id, this.internalGeneticRun.genetic_run_iterations[0].options).catch(e => e)
+      const { data: { message, errors }, status } = await this.$axios.post('/strategies/set-options/' + this.internalGeneticRun.strategy_id, this.internalGeneticRun.genetic_run_iterations[0].options).catch(e => e)
       this.setBestOptionsLoading = false
       this.$error(status, message, errors)
     }

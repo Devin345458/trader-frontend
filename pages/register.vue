@@ -59,7 +59,7 @@ export default {
     async login () {
       if (!this.$refs.form.validate()) { return }
       this.loading = true
-      const { data: { message, problems }, status } = await this.$axios.post('/v1/users', {
+      const { data: { message, problems }, status } = await this.$axios.post('/users', {
         first_name: this.first_name,
         last_name: this.last_name,
         email: this.email,
