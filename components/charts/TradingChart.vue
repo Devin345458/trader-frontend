@@ -51,28 +51,26 @@ export default {
       }
     }
   },
+
   computed: {
     chartTicks () {
       const data = [...this.ticks]
       return data.sort((a, b) => a.time - b.time).map((d) => {
-        return [d.time * 1000, d.close, d.high, d.low, d.close, Number(d.volume.toFixed(2))]
+        return [d.openTimeInMillis, d.close, d.high, d.low, d.close, Number(d.volume.toFixed(2))]
       })
     },
     chartVolume () {
       const data = [...this.ticks]
       return data.sort((a, b) => b.time - a.time).map((d) => {
-        return [d.time * 1000, Number(d.volume.toFixed(2))]
+        return [d.openTimeInMillis, Number(d.volume.toFixed(2))]
       })
     },
     chartTrades () {
       const data = [...this.trades]
       return data.sort((a, b) => a.time - b.time).map((d) => {
-        return [d.time * 1000, d.side === 'buy' ? 1 : 0, Number(d.price), this.tradeLabel(d)]
+        return [d.time, d.side === 'buy' ? 1 : 0, Number(d.price), this.tradeLabel(d)]
       })
     }
-  },
-  errorCaptured () {
-    return false // stops the error from propagating further
   },
   watch: {
     chartTicks: {
@@ -94,13 +92,16 @@ export default {
       immediate: true
     }
   },
+  errorCaptured () {
+    return false // stops the error from propagating further
+  },
   methods: {
     tradeLabel (trade) {
       switch (trade.side) {
         case 'buy':
-          return `Purchased ${Number(trade.size).toFixed(2)} shares at $${trade.price}`
+          return `Purchased ${Number(trade.quantity).toFixed(2)} shares at $${trade.price}`
         case 'sell':
-          return `Sold ${Number(trade.size).toFixed(2)} shares at $${trade.price}`
+          return `Sold ${Number(trade.quantity).toFixed(2)} shares at $${trade.price}`
       }
     },
     updateChart () {

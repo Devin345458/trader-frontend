@@ -29,6 +29,9 @@ export default {
         phone: [
           v => !!v || 'Phone Number is required',
           v => (v && v.length === 10) || 'Phone Number must be 11 digits'
+        ],
+        requiredNumber: [
+          v => !!v || 'Field is required'
         ]
       }
     }

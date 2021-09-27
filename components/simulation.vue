@@ -4,9 +4,6 @@
       <v-card-title>
         Simulation Settings
         <v-spacer />
-        <template v-if="best">
-          Best P&L ${{ formatPrice(best) }}
-        </template>
         <template v-if="trades.length">
           P&L ${{ formatPrice(totalPNL) }}
         </template>
@@ -16,8 +13,8 @@
       </v-card-title>
       <v-card-text v-if="!candles.length">
         <v-form ref="simulation">
-          <v-text-field v-model="number_of_days" type="number" label="Number of days to run sim" />
-          <v-currency-field v-model="initial_balance" prefix="$" label="Initial Balance" />
+          <v-text-field v-model="number_of_days" type="number" :rules="rules.requiredNumber" label="Number of days to run sim" />
+          <v-currency-field v-model="initial_balance" :rules="rules.requiredNumber" prefix="$" label="Initial Balance" />
         </v-form>
       </v-card-text>
       <v-card-text v-else v-resize="onResize">
@@ -33,16 +30,16 @@
           :items="sorted_trades"
           :headers="headers"
         >
-          <template v-slot:item.time="{item}">
+          <template #item.time="{item}">
             {{ time(item.time) }}
           </template>
-          <template v-slot:item.size="{item}">
-            {{ Number(item.size).toFixed(2) }}
+          <template #item.size="{item}">
+            {{ Number(item.quantity).toFixed(2) }}
           </template>
-          <template v-slot:item.profitLoss="{item}">
+          <template #item.profitLoss="{item}">
             {{ item.profitLoss? '$' + item.profitLoss.toFixed(2): '' }}
           </template>
-          <template v-slot:item.side="{item: {side}}">
+          <template #item.side="{item: {side}}">
             <div style="border-left: 2px solid; padding-left: 5px" :style="{ color: side === 'buy'? 'green': 'red', borderColor: side === 'buy'? 'green': 'red'}">
               {{ side.charAt(0).toUpperCase() + side.slice(1) }}
             </div>
@@ -50,14 +47,14 @@
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="results" color="error" @click="internal_value = false">
+        <v-btn v-if="!!candles.length" color="error" @click="internal_value = false">
           Close
         </v-btn>
         <v-spacer />
-        <v-btn v-if="!results" color="primary" :loading="loading" @click="runSim">
+        <v-btn v-if="!candles.length || loading" color="primary" :loading="loading" @click="runSim">
           Run Sim
         </v-btn>
-        <v-btn v-else color="primary" @click="results = false">
+        <v-btn v-else color="primary" @click="clear">
           Edit
         </v-btn>
       </v-card-actions>
@@ -68,9 +65,11 @@
 <script>
 import moment from 'moment'
 import TradingChart from '~/components/charts/TradingChart'
+import validations from '~/mixins/validations'
 export default {
   name: 'Simulation',
   components: { TradingChart },
+  mixins: [validations],
   props: {
     value: {
       type: Boolean,
@@ -84,8 +83,8 @@ export default {
   data () {
     return {
       loading: false,
-      initial_balance: 0,
-      number_of_days: 0,
+      initial_balance: 10000,
+      number_of_days: 30,
       results: false,
       trades: [],
       candles: [],
@@ -139,36 +138,42 @@ export default {
     async runSim () {
       if (!this.$refs.simulation.validate()) { return }
       this.loading = true
-      this.socket = this.$ws.subscribe('strategy:simulation-' + this.strategy.id)
-      if (!this.socket) {
-        this.internal_value = false
-        this.$noty.error('Unable to make websocket connect to server')
-        return
-      }
-
-      await this.socket.emit('runSim', {
+      this.sockets.subscribe('strategy:simulation-' + this.strategy.id, this.handleMessage)
+      const { data: { message, errors }, status } = await this.$axios.post('/genetic-runs/simulate', {
         initialBalance: this.initial_balance,
         numberOfDays: this.number_of_days,
         strategy: this.strategy
-      })
-
-      this.socket.on('error', (err) => {
-        this.$noty.error(err.message || 'Unknown Error')
-        this.internal_value = false
-      })
-
-      this.socket.on('close', () => {
-        this.internal_value = false
-      })
-
-      this.socket.on('message', ({ type, data }) => {
-        if (type === 'order') { this.trades = this.trades.concat(data) }
-        if (type === 'ticks') {
-          this.loading = false
-          this.candles = this.candles.concat(data)
-        }
-        if (type === 'indicator') {
-          const indicators = {}
+      }).catch(e => e)
+      this.$error(status, message, errors)
+    },
+    time (val) {
+      return moment(val).format('MMMM Do YYYY, h:mm:ss a')
+    },
+    clear () {
+      this.trades = []
+      this.candles = []
+      this.indicators = {}
+      this.loading = false
+      this.sockets.unsubscribe('strategy:simulation-' + this.strategy.id)
+    },
+    formatPrice (value) {
+      const val = (value / 1).toFixed(2)
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    },
+    handleMessage ({ type, data }) {
+      const indicators = {}
+      switch (type) {
+        case 'candles':
+          this.candles = data
+          break
+        case 'order':
+          this.trades = this.trades.concat(data)
+          break
+        case 'error':
+          this.$noty.error(data.message)
+          this.internal_value = false
+          break
+        case 'indicator':
           data.forEach((indicator) => {
             if (!indicators[indicator.name]) {
               indicators[indicator.name] = []
@@ -182,33 +187,13 @@ export default {
             }
             this.indicators[key] = this.indicators[key].concat(indicators[key])
           }
-        }
-        if (type === 'error') {
-          this.$noty.error(data.message)
-          this.internal_value = false
-        }
-        if (type === 'best') {
-          this.best = data
-        }
-      })
-    },
-    time (val) {
-      return moment(val * 1000).format('MMMM Do YYYY, h:mm:ss a')
-    },
-    clear () {
-      this.trades = []
-      this.candles = []
-      this.indicators = {}
-      this.loading = false
-      if (this.socket) {
-        this.socket.close()
-        this.socket = null
+          break
+        case 'finished':
+          this.loading = false
+          break
+        default:
+          this.$noty.error('unknown webhook ' + type, data)
       }
-      this.best = false
-    },
-    formatPrice (value) {
-      const val = (value / 1).toFixed(2)
-      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     }
   }
 }

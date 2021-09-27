@@ -11,6 +11,7 @@ module.exports = {
     '@nuxtjs',
     'plugin:nuxt/recommended'
   ],
+  ignorePatterns: ['tradingview.js'],
   plugins: [
   ],
   // add your custom rules here

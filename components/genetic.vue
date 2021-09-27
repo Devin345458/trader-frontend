@@ -1,6 +1,6 @@
 <template>
   <v-dialog ref="dialog" v-model="value" persistent width="80%">
-    <template v-slot:activator="{on, attrs}">
+    <template #activator="{on, attrs}">
       <slot name="activator" v-bind="{on, attrs}" />
     </template>
     <v-card ref="card" :loading="loading">
@@ -30,14 +30,14 @@
           :items="internalGeneticRun.genetic_run_iterations"
           :headers="headers"
         >
-          <template v-slot:item.profit_loss="{item}">
+          <template #item.profit_loss="{item}">
             {{ formatPrice(item.profit_loss) }}
           </template>
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="internalGeneticRun" color="error" @click="close">
-          Close
+        <v-btn v-if="internalGeneticRun" color="error" @click="cancel">
+          Cancel
         </v-btn>
         <v-spacer />
         <v-btn v-if="!internalGeneticRun" color="primary" :loading="loading" @click="runGeneticEvolution">
@@ -86,7 +86,6 @@ export default {
         { text: 'Iteration', value: 'iteration' },
         { text: 'Best Value', value: 'profit_loss' }
       ],
-      running: false,
       internalGeneticRun: false
     }
   },
@@ -109,7 +108,6 @@ export default {
     async runGeneticEvolution () {
       if (!this.$refs.genetic.validate()) { return }
       this.loading = true
-      this.running = true
       const { data: { geneticRun, message, errors }, status } = await this.$axios.post('/genetic-runs/start', {
         initialBalance: this.initial_balance,
         numberOfDays: this.number_of_days,
@@ -117,53 +115,50 @@ export default {
         populationSize: this.populationSize,
         strategy: this.strategy
       }).catch(e => e)
-      if (this.$error(status, message, errors)) { return }
+      if (this.$error(status, message, errors)) {
+        this.loading = false
+        return
+      }
       geneticRun.genetic_run_iterations = []
       this.internalGeneticRun = geneticRun
       this.setUpListeners()
     },
     close () {
       this.value = false
-      this.clear()
-    },
-    clear () {
-      if (!this.geneticRun) {
+      if (this.internalGeneticRun) {
+        this.sockets.unsubscribe(`genetic-run:${this.internalGeneticRun.id}`)
         this.internalGeneticRun = false
         this.loading = false
-        if (this.$ws.socket.getSubscription(`genetic-run:${this.geneticId}`)) {
-          this.$ws.socket.getSubscription(`genetic-run:${this.geneticId}`).close()
-        }
       }
+    },
+    async cancel () {
+      this.close()
+      await this.$socket.emit('genetic-run:cancel', this.internalGeneticRun.id)
     },
     formatPrice (value) {
       const val = (value / 1).toFixed(2)
       return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     setUpListeners () {
-      this.$ws.$on('error', () => {
-        this.value = false
-      })
-
-      this.$ws.$on('close', () => {
-        if (this.running) {
-          this.clear()
+      this.sockets.subscribe(`genetic-run:${this.internalGeneticRun.id}`, ({ data, type }) => {
+        switch (type) {
+          case 'iteration':
+            this.internalGeneticRun.genetic_run_iterations.unshift(data)
+            if (this.internalGeneticRun.genetic_run_iterations.length === this.internalGeneticRun.iterations) {
+              this.loading = false
+            }
+            break
+          default:
+            this.$noty.error('unknown genetic event')
         }
       })
-
-      this.$ws.$on(`genetic-run:${this.internalGeneticRun.id}|iteration`, (iteration) => {
-        this.internalGeneticRun.genetic_run_iterations.unshift(iteration)
-        if (this.internalGeneticRun.genetic_run_iterations.length === this.internalGeneticRun.iterations) {
-          this.loading = false
-        }
-      })
-
-      this.$ws.subscribe(`genetic-run:${this.internalGeneticRun.id}`)
     },
     async setBestOptions () {
       this.setBestOptionsLoading = true
-      const { data: { message, errors }, status } = await this.$axios.post('/strategies/set-options/' + this.internalGeneticRun.strategy_id, this.internalGeneticRun.genetic_run_iterations[0].options).catch(e => e)
+      const { data: { strategy, message, errors }, status } = await this.$axios.post('/strategies/set-options/' + this.internalGeneticRun.strategy_id, this.internalGeneticRun.genetic_run_iterations[0].options).catch(e => e)
       this.setBestOptionsLoading = false
-      this.$error(status, message, errors)
+      if (this.$error(status, message, errors)) { return }
+      this.$emit('update:strategy', strategy)
     }
   }
 }

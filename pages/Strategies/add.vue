@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <strategy-form ref="form" v-model="loading" :strategy="strategy" @save="save" />
+    <strategy-form ref="form" v-model="strategy" :loading="loading" @save="save" />
   </v-container>
 </template>
 
@@ -17,7 +17,7 @@ export default {
         name: null,
         indicator: null,
         profile_id: null,
-        type: null,
+        type: 'Live',
         coin: null,
         options: {}
       }

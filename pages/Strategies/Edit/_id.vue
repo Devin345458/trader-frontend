@@ -2,8 +2,8 @@
   <v-container>
     <strategy-form
       ref="form"
-      v-model="loading"
-      :strategy="strategy"
+      v-model="strategy"
+      :loading="loading"
       edit
       @save="save"
       @simulate="simulationModal = true"

@@ -1,6 +1,9 @@
 <template>
   <v-container>
-    <v-card-title>
+    <v-card-title class="px-0">
+      <v-chip v-if="strategy.type === 'Paper'" class="mr-2" label color="error">
+        Paper
+      </v-chip>
       {{ strategy.name }} - {{ strategy.coin }}
       <v-spacer />
       <v-btn
@@ -42,20 +45,20 @@
       </v-btn>
     </v-card-title>
     <v-row>
-      <v-col md="12">
+      <v-col v-if="false" md="12">
         <v-card ref="card">
           <trading-chart
             v-if="strategy.coin"
             :width="cardWidth"
             :ticks="uniqueTicks"
-            :trades="trades"
+            :trades="strategy.trades"
             :coin="strategy.coin"
             :indicators="indicators"
           />
         </v-card>
       </v-col>
       <v-col cols="12">
-        <v-card :loading="tradesLoading">
+        <v-card>
           <v-card-title>
             Trades
             <v-spacer />
@@ -66,10 +69,10 @@
               :items="trades"
               :headers="headers"
             >
-              <template v-slot:item.profitLoss="{item}">
+              <template #item.profitLoss="{item}">
                 {{ item.profitLoss? '$' + item.profitLoss.toFixed(2): '' }}
               </template>
-              <template v-slot:item.side="{item: {side}}">
+              <template #item.side="{item: {side}}">
                 <div style="border-left: 2px solid; padding-left: 5px" :style="{ color: side === 'buy'? 'green': 'red', borderColor: side === 'buy'? 'green': 'red'}">
                   {{ side.charAt(0).toUpperCase() + side.slice(1) }}
                 </div>
@@ -93,12 +96,12 @@
         </v-card>
       </v-col>
       <v-col cols="12">
-        <v-card :loading="geneticLoading">
+        <v-card>
           <v-card-title>
             Genetic Runs
             <v-spacer />
-            <genetic :strategy="strategy">
-              <template v-slot:activator="{ on, attrs }">
+            <genetic :strategy.sync="strategy" @newRun="geneticRuns.push($event)">
+              <template #activator="{ on, attrs }">
                 <v-btn
                   v-bind="attrs"
                   color="primary"
@@ -114,10 +117,10 @@
               :items="geneticRuns"
               :headers="geneticHeaders"
             >
-              <template v-slot:item.created_at="{item}">
+              <template #item.created_at="{item}">
                 {{ formatTime(item.created_at) }}
               </template>
-              <template v-slot:item.actions="{item}">
+              <template #item.actions="{item}">
                 <v-btn
                   color="error"
                   icon
@@ -128,7 +131,7 @@
                   </v-icon>
                 </v-btn>
                 <genetic :genetic-run="item">
-                  <template v-slot:activator="{on}">
+                  <template #activator="{on}">
                     <v-btn
                       color="info"
                       icon
@@ -202,36 +205,19 @@ export default {
   mounted () {
     this.setupSocketListeners()
     this.getStrategy()
-    this.getTrades()
-    this.getTradeTicks()
-    this.getIndicators()
+    // this.getIndicators()
     this.onResize()
     this.getGeneticRuns()
   },
   methods: {
     async getStrategy () {
       this.loading = true
-      const { data: { strategy, message, errors }, status } = await this.$axios.get(`/strategies/${this.$route.params.id}`).catch(e => e)
+      const { data: { strategy, message, errors }, status } = await this.$axios.get(`/strategies/get/${this.$route.params.id}`).catch(e => e)
       this.loading = false
       if (this.$error(status, message, errors)) { return }
       this.strategy = strategy
     },
-    async getTrades () {
-      this.tradesLoading = true
-      const { data: { trades, message, errors }, status } = await this.$axios.get(`/trades/strategy/${this.$route.params.id}`).catch(e => e)
-      this.tradesLoading = false
-      if (this.$error(status, message, errors)) { return }
-      this.trades = trades
-    },
-    async getTradeTicks () {
-      this.loading = true
-      const { data: { tradeTicks, message, errors }, status } = await this.$axios.get(`/trades/get-ticks/${this.$route.params.id}`).catch(e => e)
-      this.loading = false
-      if (this.$error(status, message, errors)) { return }
-      this.ticks = tradeTicks
-    },
     onResize () {
-      this.cardWidth = this.$refs.card.$el.offsetWidth
     },
     async getIndicators () {
       this.loading = true
@@ -241,23 +227,22 @@ export default {
       this.indicators = indicators
     },
     setupSocketListeners () {
-      this.$ws.$on('error', (err) => {
+      this.sockets.subscribe('error', (err) => {
         this.$noty.error(err.message || 'Unknown Error')
         // this.$router.push('/strategies')
       })
-      this.$ws.$on(`bot-socket:${this.$route.params.id}|trade-ticker`, (tradeTick) => {
+      this.sockets.subscribe(`bot-socket:${this.$route.params.id}|trade-ticker`, (tradeTick) => {
         this.ticks.push(tradeTick)
       })
-      this.$ws.$on(`bot-socket:${this.$route.params.id}|trade-indicator`, (tradeIndicator) => {
+      this.sockets.subscribe(`bot-socket:${this.$route.params.id}|trade-indicator`, (tradeIndicator) => {
         this.indicators[tradeIndicator.name] = { time: tradeIndicator.time, indicator: tradeIndicator.indicator }
       })
-      this.$ws.$on(`bot-socket:${this.$route.params.id}|trade`, (trade) => {
+      this.sockets.subscribe(`bot-socket:${this.$route.params.id}|trade`, (trade) => {
         this.trades.push(trade)
       })
-      this.$ws.$on(`bot-socket:${this.$route.params.id}|genetic-run`, (geneticRun) => {
+      this.sockets.subscribe(`bot-socket:${this.$route.params.id}|genetic-run`, (geneticRun) => {
         replaceItemByFieldToArray('id', this.geneticRuns, geneticRun)
       })
-      this.$ws.subscribe(`bot-socket:${this.$route.params.id}`)
     },
     async stopStrategy () {
       this.enableLoading = true
@@ -271,7 +256,7 @@ export default {
       const { data: { message, errors }, status } = await this.$axios.put(`/strategies/start/${this.$route.params.id}`).catch(e => e)
       this.enableLoading = false
       if (this.$error(status, message, errors)) { return }
-      this.strategy.enabled = false
+      this.strategy.enabled = true
     },
     async getGeneticRuns () {
       this.geneticLoading = true

@@ -1,11 +1,12 @@
 <template>
-  <v-card :loading="loading">
+  <v-card :loading="loading || internalLoading">
     <v-card-title>Edit {{ strategy.name }} Strategy</v-card-title>
     <v-card-text>
       <v-form ref="form">
         <v-select v-model="strategy.type" :items="types" label="Trade Type" :rules="rules.required" @change="strategy.profile_id = null" />
         <v-text-field v-model="strategy.name" label="Strategy Name" :rules="rules.required" />
         <v-select
+          v-if="strategy.type === 'Live'"
           v-model="strategy.profile_id"
           :items="profiles"
           label="Profile"
@@ -15,7 +16,7 @@
           item-text="name"
         />
         <v-select v-model="strategy.indicator" :items="indicators" label="Indicator" :rules="rules.required" />
-        <v-select
+        <v-autocomplete
           v-if="!edit"
           v-model="strategy.coin"
           item-value="id"
@@ -26,8 +27,17 @@
           :rules="rules.required"
         />
         <template v-for="option in options">
+          <v-select
+            v-if="option.options"
+            :key="option.property"
+            v-model="strategy.options[option.property]"
+            :items="option.options"
+            type="number"
+            :label="option.label"
+            :rules="option.required? rules.required: []"
+          />
           <v-currency-field
-            v-if="option.type === 'Currency'"
+            v-else-if="option.type === 'Currency'"
             :key="option.property"
             v-model="strategy.options[option.property]"
             prefix="$"
@@ -78,11 +88,11 @@ export default {
   name: 'StrategyForm',
   mixins: [validations],
   props: {
-    strategy: {
+    value: {
       type: Object,
       required: true
     },
-    value: {
+    loading: {
       type: Boolean,
       required: true
     },
@@ -95,12 +105,14 @@ export default {
     return {
       coinsLoading: false,
       profilesLoading: false,
+      internalLoading: false,
       indicators: [
         { text: 'Momentum', value: 'Momentum' },
         { text: 'Cross Over Volume Weight Moving Average', value: 'CrossoverVwap' },
         { text: 'Cross Over VWMA EMA', value: 'CrossoverVwapEma' },
         { text: 'Moving Average', value: 'MovingAverage' },
-        { text: 'Relative Strength Index', value: 'RelativeStrengthIndex' }
+        { text: 'Relative Strength Index', value: 'RelativeStrengthIndex' },
+        { text: 'Performance Maximization', value: 'Pmax' }
       ],
       types: [
         { text: 'Development - Paper Trading', value: 'Paper' },
@@ -112,20 +124,12 @@ export default {
     }
   },
   computed: {
-    loading: {
+    strategy: {
       get () {
         return this.value
       },
       set (val) {
         this.$emit('input', val)
-      }
-    },
-    interval: {
-      get () {
-        return this.strategy.interval / 1000 / 60 || null
-      },
-      set (val) {
-        this.strategy.interval = val * 1000 * 60
       }
     }
   },
@@ -158,11 +162,16 @@ export default {
     },
     async getOptions () {
       if (!this.strategy.indicator) { return }
-      this.loading = true
+      this.internalLoading = true
       const { data: { options, message, errors }, status } = await this.$axios.get('/strategies/options/' + this.strategy.indicator).catch(e => e)
-      this.loading = false
+      this.internalLoading = false
       if (this.$error(status, message, errors)) { return }
       this.options = options
+      this.options.forEach((option) => {
+        if (option.default) {
+          this.strategy.options[option.property] = option.default
+        }
+      })
     },
     validate () {
       return this.$refs.form.validate()
