@@ -36,7 +36,7 @@
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="internalGeneticRun" color="error" @click="cancel">
+        <v-btn v-if="internalGeneticRun" color="error" :loading="canceling" @click="cancel">
           Cancel
         </v-btn>
         <v-spacer />
@@ -86,7 +86,8 @@ export default {
         { text: 'Iteration', value: 'iteration' },
         { text: 'Best Value', value: 'profit_loss' }
       ],
-      internalGeneticRun: false
+      internalGeneticRun: false,
+      canceling: false
     }
   },
   computed: {
@@ -129,11 +130,15 @@ export default {
         this.sockets.unsubscribe(`genetic-run:${this.internalGeneticRun.id}`)
         this.internalGeneticRun = false
         this.loading = false
+        this.canceling = false
       }
     },
     async cancel () {
+      this.canceling = true
+      const { data: { message, errors }, status } = await this.$axios.delete('/genetic-runs/cancel/' + this.internalGeneticRun.id, {}).catch(e => e)
+      if (this.$error(status, message, errors)) { return }
+      this.cancling = false
       this.close()
-      await this.$socket.emit('genetic-run:cancel', this.internalGeneticRun.id)
     },
     formatPrice (value) {
       const val = (value / 1).toFixed(2)
