@@ -46,8 +46,8 @@ export default {
       trading: false,
       overlays: [Overlays.VWMA, Overlays.EMA],
       chartConfig: {
-        MAX_ZOOM: 5000000,
-        MIN_ZOOM: 0
+        DEFAULT_LEN: 1000,
+        MAX_ZOOM: 7500
       }
     }
   },
@@ -107,7 +107,6 @@ export default {
     updateChart () {
       const data = {
         chart: {
-          type: 'Spline',
           indexBased: this.indexBased,
           data: this.chartTicks
         },
@@ -123,13 +122,7 @@ export default {
             }
           }
         ],
-        offchart: [
-          {
-            name: 'Volume',
-            type: 'Volume',
-            data: this.chartVolume
-          }
-        ]
+        offchart: []
       }
       if (this.indicators) {
         Object.keys(this.indicators).forEach((key) => {

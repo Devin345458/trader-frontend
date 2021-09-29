@@ -205,7 +205,6 @@ export default {
   mounted () {
     this.setupSocketListeners()
     this.getStrategy()
-    // this.getIndicators()
     this.onResize()
     this.getGeneticRuns()
   },
@@ -218,13 +217,6 @@ export default {
       this.strategy = strategy
     },
     onResize () {
-    },
-    async getIndicators () {
-      this.loading = true
-      const { data: { indicators, message, errors }, status } = await this.$axios.get(`/trades/get-indicators/${this.$route.params.id}`).catch(e => e)
-      this.loading = false
-      if (this.$error(status, message, errors)) { return }
-      this.indicators = indicators
     },
     setupSocketListeners () {
       this.sockets.subscribe('error', (err) => {

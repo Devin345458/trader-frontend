@@ -112,7 +112,8 @@ export default {
         { text: 'Cross Over VWMA EMA', value: 'CrossoverVwapEma' },
         { text: 'Moving Average', value: 'MovingAverage' },
         { text: 'Relative Strength Index', value: 'RelativeStrengthIndex' },
-        { text: 'Performance Maximization', value: 'Pmax' }
+        { text: 'Performance Maximization', value: 'Pmax' },
+        { text: 'Test Strategy', value: 'Test' }
       ],
       types: [
         { text: 'Development - Paper Trading', value: 'Paper' },
