@@ -107,7 +107,6 @@ export default {
     updateChart () {
       const data = {
         chart: {
-          type: 'Spline',
           indexBased: this.indexBased,
           data: this.chartTicks
         },
