@@ -112,7 +112,8 @@ export default {
         { text: 'Cross Over VWMA EMA', value: 'CrossoverVwapEma' },
         { text: 'Moving Average', value: 'MovingAverage' },
         { text: 'Relative Strength Index', value: 'RelativeStrengthIndex' },
-        { text: 'Performance Maximization', value: 'Pmax' }
+        { text: 'Performance Maximization', value: 'Pmax' },
+        { text: 'Every Tick', value: 'EveryTick' }
       ],
       types: [
         { text: 'Development - Paper Trading', value: 'Paper' },
@@ -153,7 +154,6 @@ export default {
       this.coins = coins
     },
     async loadProfiles () {
-      if (!this.strategy.type) { return }
       this.profilesLoading = true
       const { data: { profiles, message }, status } = await this.$axios.get(`/profiles/${this.strategy.type}`).catch(e => e)
       this.profilesLoading = false
@@ -168,7 +168,7 @@ export default {
       if (this.$error(status, message, errors)) { return }
       this.options = options
       this.options.forEach((option) => {
-        if (option.default) {
+        if (option.default && !this.strategy.options[option.property]) {
           this.strategy.options[option.property] = option.default
         }
       })

@@ -14,7 +14,10 @@
           :items="strategies"
           :headers="headers"
         >
-          <template v-slot:item.actions="{item}">
+          <template #item.status="{item}">
+            {{ item.enabled ? 'Running' : 'Stopped' }}
+          </template>
+          <template #item.actions="{item}">
             <v-btn color="success" icon :to="'/strategies/view/' + item.id">
               <v-icon>mdi-eye</v-icon>
             </v-btn>
@@ -40,6 +43,7 @@ export default {
     return {
       headers: [
         { text: 'Name', value: 'name' },
+        { text: 'Status', value: 'status' },
         { text: 'Environment', value: 'type' },
         { text: 'Indicator', value: 'indicator' },
         { text: 'Coin', value: 'coin' },

@@ -24,7 +24,6 @@
           :indicators="indicators"
           :width="cardWidth"
           :coin="strategy.coin"
-          index-based
         />
         <v-data-table
           :items="sorted_trades"
@@ -164,7 +163,7 @@ export default {
       const indicators = {}
       switch (type) {
         case 'candles':
-          this.candles = data
+          this.candles = this.candles.concat(data)
           break
         case 'order':
           this.trades = this.trades.concat(data)

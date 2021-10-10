@@ -1,5 +1,5 @@
 <template>
-  <v-dialog ref="dialog" v-model="value" persistent width="80%">
+  <v-dialog ref="dialog" v-model="dialog" persistent width="80%">
     <template #activator="{on, attrs}">
       <slot name="activator" v-bind="{on, attrs}" />
     </template>
@@ -60,10 +60,9 @@
 export default {
   name: 'Genetic',
   props: {
-    strategy: {
+    value: {
       type: Object,
-      required: false,
-      default: () => {}
+      required: true
     },
     geneticRun: {
       type: Object,
@@ -73,7 +72,7 @@ export default {
   },
   data () {
     return {
-      value: false,
+      dialog: false,
       loading: false,
       setBestOptionsLoading: false,
 
@@ -98,6 +97,14 @@ export default {
     },
     bestPNL () {
       return this.internalGeneticRun.perfect
+    },
+    strategy: {
+      get () {
+        return this.value
+      },
+      set (val) {
+        this.$emit('input', val)
+      }
     }
   },
   created () {
@@ -125,7 +132,7 @@ export default {
       this.setUpListeners()
     },
     close () {
-      this.value = false
+      this.dialog = false
       if (this.internalGeneticRun) {
         this.sockets.unsubscribe(`genetic-run:${this.internalGeneticRun.id}`)
         this.internalGeneticRun = false

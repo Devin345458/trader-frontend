@@ -46,7 +46,7 @@ export default {
       trading: false,
       overlays: [Overlays.VWMA, Overlays.EMA],
       chartConfig: {
-        MAX_ZOOM: 5000000,
+        MAX_ZOOM: 5000,
         MIN_ZOOM: 0
       }
     }
@@ -68,7 +68,7 @@ export default {
     chartTrades () {
       const data = [...this.trades]
       return data.sort((a, b) => a.time - b.time).map((d) => {
-        return [d.time, d.side === 'buy' ? 1 : 0, Number(d.price), this.tradeLabel(d)]
+        return [d.time, d.side === 'buy' ? 1 : 0, Number(d.price)]
       })
     }
   },
@@ -124,11 +124,6 @@ export default {
           }
         ],
         offchart: [
-          {
-            name: 'Volume',
-            type: 'Volume',
-            data: this.chartVolume
-          }
         ]
       }
       if (this.indicators) {

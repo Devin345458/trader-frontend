@@ -5,9 +5,9 @@
       <v-card-text>
         <v-form ref="form1">
           <v-text-field v-model="profile.name" label="Profile Name" :rules="rules.required" />
-          <v-text-field v-model="profile.apiKey" label="Coin Base Api Key" :rules="rules.required" />
-          <v-text-field v-model="profile.apiPhrase" label="Coin Base Api Phrase" :rules="rules.required" />
-          <v-text-field v-model="profile.apiSecret" label="Coin Base Api Secret" :rules="rules.required" />
+          <v-text-field v-model="profile.cApiKey" label="Coin Base Api Key" :rules="rules.required" />
+          <v-text-field v-model="profile.cApiPhrase" label="Coin Base Api Phrase" :rules="rules.required" />
+          <v-text-field v-model="profile.cApiSecret" label="Coin Base Api Secret" :rules="rules.required" />
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -34,9 +34,9 @@ export default {
       profile: {
         name: undefined,
         coinProfileId: undefined,
-        apiKey: undefined,
-        apiPhrase: undefined,
-        apiSecret: undefined
+        cApiKey: undefined,
+        cApiPhrase: undefined,
+        cApiSecret: undefined
       },
       profiles: [],
       loading: false
