@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import moment from 'moment'
+import moment from 'moment-timezone'
 import Genetic from '~/components/genetic'
 import { replaceItemByFieldToArray } from '~/utils/utils'
 export default {
@@ -95,6 +95,9 @@ export default {
   watch: {
     'strategy.id': {
       async handler (val, oldVal) {
+        if (val === oldVal) {
+          return
+        }
         this.loading = true
         const {
           data: { runs, message, errors },
@@ -115,6 +118,9 @@ export default {
       immediate: true
     }
   },
+  beforeDestroy () {
+    this.sockets.unsubscribe(`bot-socket:${this.strategy.id}|genetic-run`)
+  },
   methods: {
     async deleteGeneticRun (id) {
       const tmp = this.geneticRuns.map(item => item.id)
@@ -125,7 +131,7 @@ export default {
       }
     },
     formatTime (time) {
-      return moment(time).fromNow()
+      return moment.utc(time.replace('-05:00', '')).local().fromNow()
     }
   }
 }

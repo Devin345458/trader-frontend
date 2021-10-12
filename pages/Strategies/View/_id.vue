@@ -58,7 +58,7 @@ import StrategyLogs from '~/components/strategy/StrategyLogs'
 import StrategyGeneticRun from '~/components/strategy/StrategyGeneticRun'
 import StrategyTrades from '~/components/strategy/StrategyTrades'
 export default {
-  name: 'Index',
+  name: 'ViewStrategy',
   components: { StrategyTrades, StrategyGeneticRun, StrategyLogs, Simulation },
   data () {
     return {
@@ -81,7 +81,7 @@ export default {
     }
   },
   created () {
-    this.strategy.id = this.$route.params.id
+    this.strategy.id = Number(this.$route.params.id)
   },
   mounted () {
     this.getStrategy()

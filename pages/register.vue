@@ -12,8 +12,8 @@
               <v-text-field v-model="first_name" label="First Name" :rules="rules.required" />
               <v-text-field v-model="last_name" label="Last Name" :rules="rules.required" />
               <v-text-field v-model="email" autocomplete="off" type="search" label="Email" :rules="rules.email" />
-              <v-text-field v-model="password" autocomplete="off" :rules="rules.password" label="Password" type="password" />
-              <v-text-field v-model="confirmPassword" autocomplete="off" :rules="confirmPasswordRules(password, confirmPassword)" label="Confirm Password" type="password" />
+              <v-text-field v-model="password" autocomplete="new-password" :rules="rules.password" label="Password" type="password" />
+              <v-text-field v-model="confirmPassword" autocomplete="new-password" :rules="confirmPasswordRules(password, confirmPassword)" label="Confirm Password" type="password" />
             </v-form>
           </v-card-text>
           <v-card-actions>
@@ -39,9 +39,9 @@
 import validations from '~/mixins/validations'
 export default {
   name: 'Register',
+  mixins: [validations],
   layout: 'login',
   auth: false,
-  mixins: [validations],
   data () {
     return {
       first_name: null,

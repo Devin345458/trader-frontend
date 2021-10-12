@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
-    "start": "nuxt start --hostname 0.0.0.0",
+    "start": "nuxt start --hostname 0.0.0.0 --port 8080",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "lint": "npm run lint:js"
@@ -61,7 +61,8 @@
     "vuetify-confirm": "^2.0.6"
   },
   "devDependencies": {
-    "@nuxt/types": "~2.15.0"
+    "@nuxt/types": "~2.15.0",
+    "moment-timezone": "^0.5.33"
   },
   "engines": {
     "node": "14.14.x"

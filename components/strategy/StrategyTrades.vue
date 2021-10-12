@@ -74,6 +74,9 @@ export default {
       },
       immediate: true
     }
+  },
+  beforeDestroy () {
+    this.sockets.unsubscribe(`bot-socket:${this.strategyId}|trade`)
   }
 }
 </script>

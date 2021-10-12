@@ -4,8 +4,13 @@
       fixed
       app
     >
-      <v-toolbar-title>Coin Base Trader</v-toolbar-title>
+      <v-toolbar-title style="cursor: pointer" @click="$router.push('/')">
+        Coin Base Trader
+      </v-toolbar-title>
       <v-spacer />
+      <v-btn text to="documentation">
+        Documentation
+      </v-btn>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -17,7 +22,13 @@
 
 <script>
 export default {
-  name: 'Login'
+  name: 'Login',
+  auth: 'guest',
+  created () {
+    if (this.$auth.user) {
+      this.$router.push('/dashboard')
+    }
+  }
 }
 </script>
 

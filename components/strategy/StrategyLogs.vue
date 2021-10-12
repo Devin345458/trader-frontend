@@ -55,6 +55,9 @@ export default {
       immediate: true
     }
   },
+  beforeDestroy () {
+    this.sockets.unsubscribe(`bot-socket:${this.strategyId}|strategy-logs`)
+  },
   methods: {
     formatTime (time) {
       return moment(time).format('YYYY-MM-DD hh:mm:ss a')
