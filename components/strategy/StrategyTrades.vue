@@ -12,6 +12,9 @@
             :items="trades"
             :headers="headers"
           >
+            <template #item.created_at="{item}">
+              {{ short_date_time(item.created_at) }}
+            </template>
             <template #item.profitLoss="{item}">
               {{ item.profit_loss? '$' + item.profit_loss.toFixed(2): '' }}
             </template>
@@ -28,8 +31,10 @@
 </template>
 
 <script>
+import time from '~/mixins/time'
 export default {
   name: 'StrategyTrades',
+  mixins: [time],
   props: {
     strategyId: {
       type: [Number, String],
@@ -43,6 +48,7 @@ export default {
       headers: [
         { text: 'Side', value: 'side' },
         { text: 'Market', value: 'currency' },
+        { text: 'Time', value: 'created_at' },
         { text: 'Size', value: 'quantity' },
         { text: 'Price', value: 'price' },
         { text: 'P&L', value: 'profitLoss' }

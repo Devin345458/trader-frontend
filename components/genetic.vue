@@ -1,9 +1,9 @@
 <template>
-  <v-dialog ref="dialog" v-model="dialog" persistent width="80%">
+  <v-dialog ref="dialog" v-model="dialog" width="80%">
     <template #activator="{on, attrs}">
       <slot name="activator" v-bind="{on, attrs}" />
     </template>
-    <v-card ref="card" :loading="loading">
+    <v-card ref="card" :loading="isRunning || loading">
       <v-card-title>
         Genetic Training Settings
         <v-spacer />
@@ -13,7 +13,7 @@
         <p v-if="bestPNL" class="mr-2 mb-0">
           Best PNL: ${{ formatPrice(bestPNL) }}
         </p>
-        <v-icon @click="close">
+        <v-icon @click="dialog = false">
           mdi-close
         </v-icon>
       </v-card-title>
@@ -105,11 +105,26 @@ export default {
       set (val) {
         this.$emit('input', val)
       }
+    },
+    isRunning () {
+      return this.internalGeneticRun.status === 'running'
+    }
+  },
+  watch: {
+    dialog (val) {
+      if (!val) {
+        if (!this.geneticRun) {
+          this.sockets.unsubscribe(`genetic-run:${this.internalGeneticRun.id}`)
+          this.internalGeneticRun = false
+          this.canceling = false
+        }
+      }
     }
   },
   created () {
     if (this.geneticRun) {
       this.internalGeneticRun = this.geneticRun
+      this.setUpListeners()
     }
   },
   methods: {
@@ -123,29 +138,19 @@ export default {
         populationSize: this.populationSize,
         strategy: this.strategy
       }).catch(e => e)
-      if (this.$error(status, message, errors)) {
-        this.loading = false
-        return
-      }
+      this.loading = false
+      if (this.$error(status, message, errors)) { return }
       geneticRun.genetic_run_iterations = []
       this.internalGeneticRun = geneticRun
       this.setUpListeners()
-    },
-    close () {
-      this.dialog = false
-      if (this.internalGeneticRun) {
-        this.sockets.unsubscribe(`genetic-run:${this.internalGeneticRun.id}`)
-        this.internalGeneticRun = false
-        this.loading = false
-        this.canceling = false
-      }
+      this.$emit('newRun', this.internalGeneticRun)
     },
     async cancel () {
       this.canceling = true
       const { data: { message, errors }, status } = await this.$axios.delete('/genetic-runs/cancel/' + this.internalGeneticRun.id, {}).catch(e => e)
       if (this.$error(status, message, errors)) { return }
       this.cancling = false
-      this.close()
+      this.dialog = false
     },
     formatPrice (value) {
       const val = (value / 1).toFixed(2)
@@ -159,6 +164,9 @@ export default {
             if (this.internalGeneticRun.genetic_run_iterations.length === this.internalGeneticRun.iterations) {
               this.loading = false
             }
+            break
+          case 'status':
+            this.internalGeneticRun.status = data
             break
           default:
             this.$noty.error('unknown genetic event')

@@ -5,7 +5,7 @@
         <v-card-title>
           Genetic Runs
           <v-spacer />
-          <genetic v-model="strategy" @newRun="geneticRuns.push($event)">
+          <genetic v-model="strategy" @newRun="geneticRuns.unshift($event)">
             <template #activator="{ on, attrs }">
               <v-btn
                 v-bind="attrs"
