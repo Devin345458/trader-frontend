@@ -13,6 +13,7 @@
 
 <script>
 import Overlays from 'tvjs-overlays'
+import moment from 'moment'
 export default {
   name: 'TradingChart',
   props: {
@@ -56,19 +57,19 @@ export default {
     chartTicks () {
       const data = [...this.ticks]
       return data.sort((a, b) => a.time - b.time).map((d) => {
-        return [d.openTimeInMillis, d.close, d.high, d.low, d.close, Number(d.volume.toFixed(2))]
+        return [d.openTimeInMillis, d.close, d.high, d.low, d.close, d.volume.toFixed(2)]
       })
     },
     chartVolume () {
       const data = [...this.ticks]
       return data.sort((a, b) => b.time - a.time).map((d) => {
-        return [d.openTimeInMillis, Number(d.volume.toFixed(2))]
+        return [d.openTimeInMillis, d.volume.toFixed(2)]
       })
     },
     chartTrades () {
       const data = [...this.trades]
       return data.sort((a, b) => a.time - b.time).map((d) => {
-        return [d.time, d.side === 'buy' ? 1 : 0, Number(d.price)]
+        return [moment(d.created_at).valueOf(), d.side === 'buy' ? 1 : 0, d.price]
       })
     }
   },

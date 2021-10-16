@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <strategy-form
+      v-if="strategy.id"
       ref="form"
       v-model="strategy"
       :loading="loading"

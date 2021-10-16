@@ -16,7 +16,6 @@
         Run Simulation
         <v-icon>mdi-notebook-outline</v-icon>
       </v-btn>
-      <simulation v-model="simulationModal" :strategy="strategy" />
       <v-btn
         text
         color="info"
@@ -49,6 +48,7 @@
     <strategy-trades :strategy-id="$route.params.id" />
     <strategy-logs :strategy-id="$route.params.id" />
     <strategy-genetic-run v-model="strategy" />
+    <simulation v-model="simulationModal" :strategy="strategy" />
   </v-container>
 </template>
 

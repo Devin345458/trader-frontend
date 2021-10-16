@@ -4,8 +4,8 @@
       <v-card-title>
         Simulation Settings
         <v-spacer />
-        <template v-if="trades.length">
-          P&L ${{ formatPrice(totalPNL) }}
+        <template v-if="holdProfits">
+          Hold Profits ${{ formatPrice(holdProfits) }}
         </template>
         <v-icon @click="internal_value = false">
           mdi-close
@@ -25,25 +25,9 @@
           :width="cardWidth"
           :coin="strategy.coin"
         />
-        <v-data-table
-          :items="sorted_trades"
-          :headers="headers"
-        >
-          <template #item.time="{item}">
-            {{ time(item.time) }}
-          </template>
-          <template #item.size="{item}">
-            {{ Number(item.quantity).toFixed(2) }}
-          </template>
-          <template #item.profitLoss="{item}">
-            {{ item.profitLoss? '$' + item.profitLoss.toFixed(2): '' }}
-          </template>
-          <template #item.side="{item: {side}}">
-            <div style="border-left: 2px solid; padding-left: 5px" :style="{ color: side === 'buy'? 'green': 'red', borderColor: side === 'buy'? 'green': 'red'}">
-              {{ side.charAt(0).toUpperCase() + side.slice(1) }}
-            </div>
-          </template>
-        </v-data-table>
+        <trades-table
+          :trades="trades"
+        />
       </v-card-text>
       <v-card-actions>
         <v-btn v-if="!!candles.length" color="error" @click="internal_value = false">
@@ -65,9 +49,10 @@
 import moment from 'moment'
 import TradingChart from '~/components/charts/TradingChart'
 import validations from '~/mixins/validations'
+import TradesTable from '~/components/tables/TradesTable'
 export default {
   name: 'Simulation',
-  components: { TradingChart },
+  components: { TradesTable, TradingChart },
   mixins: [validations],
   props: {
     value: {
@@ -88,16 +73,9 @@ export default {
       trades: [],
       candles: [],
       indicators: {},
-      headers: [
-        { text: 'Side', value: 'side' },
-        { text: 'Market', value: 'product_id' },
-        { text: 'Time', value: 'time' },
-        { text: 'Size', value: 'size' },
-        { text: 'Price', value: 'price' },
-        { text: 'P&L', value: 'profitLoss' }
-      ],
       chart: null,
       cardWidth: 500,
+      holdProfits: 0,
       socket: null,
       best: false
     }
@@ -113,11 +91,7 @@ export default {
     },
     totalPNL () {
       if (!this.trades.length) { return 0 }
-      return this.trades.filter(a => a.profitLoss).map(a => a.profitLoss).reduce((a, b) => a + b, 0).toFixed(2)
-    },
-    sorted_trades () {
-      const data = [...this.trades]
-      return data.sort((a, b) => a.time - b.time)
+      return this.trades.map(a => a.profit_loss).reduce((a, b) => a + b, 0).toFixed(2)
     }
   },
   watch: {
@@ -152,6 +126,7 @@ export default {
       this.trades = []
       this.candles = []
       this.indicators = {}
+      this.holdProfits = 0
       this.loading = false
       this.sockets.unsubscribe('strategy:simulation-' + this.strategy.id)
     },
@@ -186,6 +161,9 @@ export default {
             }
             this.indicators[key] = this.indicators[key].concat(indicators[key])
           }
+          break
+        case 'holdProfits':
+          this.holdProfits = data
           break
         case 'finished':
           this.loading = false

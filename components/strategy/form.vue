@@ -15,7 +15,6 @@
           item-value="id"
           item-text="name"
         />
-        <v-select v-model="strategy.indicator" :items="indicators" label="Indicator" :rules="rules.required" />
         <v-autocomplete
           v-if="!edit"
           v-model="strategy.coin"
@@ -26,6 +25,8 @@
           label="Coin"
           :rules="rules.required"
         />
+        <v-select v-model="strategy.indicator" :items="indicators" label="Indicator" :rules="rules.required" />
+        <v-select v-if="strategy.indicator === 'Genetic'" v-model="strategy.options.indicator" :items="indicators" label="Indicator" :rules="rules.required" />
         <template v-for="option in options">
           <v-select
             v-if="option.options"
@@ -113,6 +114,7 @@ export default {
         { text: 'Moving Average', value: 'MovingAverage' },
         { text: 'Relative Strength Index', value: 'RelativeStrengthIndex' },
         { text: 'Performance Maximization', value: 'Pmax' },
+        { text: 'Running Genetic', value: 'Genetic' },
         { text: 'Every Tick', value: 'EveryTick' }
       ],
       types: [
@@ -135,12 +137,22 @@ export default {
     }
   },
   watch: {
-    'strategy.indicator' () {
-      this.getOptions()
+    'strategy.indicator' (val) {
+      this.strategy.options = {}
+      this.getOptions(val)
+    },
+    'strategy.options.indicator' (val) {
+      this.strategy.options = { indicator: val, geneticInterval: this.strategy.options.geneticInterval }
+      this.getOptions(val, true)
     }
   },
   mounted () {
-    this.getOptions()
+    this.getOptions(this.strategy.indicator).then(() => {
+      if (this.strategy.options.indicator) {
+        this.getOptions(this.strategy.options.indicator, true)
+      }
+    })
+
     this.loadCoins()
     this.loadProfiles()
   },
@@ -160,13 +172,23 @@ export default {
       if (this.$error(status, message)) { return }
       this.profiles = profiles
     },
-    async getOptions () {
-      if (!this.strategy.indicator) { return }
+    async getOptions (val, merge = false) {
+      if (!val) { return }
       this.internalLoading = true
-      const { data: { options, message, errors }, status } = await this.$axios.get('/strategies/options/' + this.strategy.indicator).catch(e => e)
+      const { data: { options, message, errors }, status } = await this.$axios.get('/strategies/options/' + val).catch(e => e)
       this.internalLoading = false
       if (this.$error(status, message, errors)) { return }
-      this.options = options
+      if (merge) {
+        options.forEach((option) => {
+          if (this.options.map(option => option.property).includes(option.property)) {
+            return
+          }
+          this.options.push(option)
+        })
+      } else {
+        this.options = options
+      }
+
       this.options.forEach((option) => {
         if (option.default && !this.strategy.options[option.property]) {
           this.strategy.options[option.property] = option.default

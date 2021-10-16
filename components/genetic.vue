@@ -57,6 +57,7 @@
 </template>
 
 <script>
+import cloneDeep from 'lodash.clonedeep'
 export default {
   name: 'Genetic',
   props: {
@@ -143,7 +144,7 @@ export default {
       geneticRun.genetic_run_iterations = []
       this.internalGeneticRun = geneticRun
       this.setUpListeners()
-      this.$emit('newRun', this.internalGeneticRun)
+      this.$emit('newRun', cloneDeep(this.internalGeneticRun))
     },
     async cancel () {
       this.canceling = true
@@ -178,7 +179,7 @@ export default {
       const { data: { strategy, message, errors }, status } = await this.$axios.post('/strategies/set-options/' + this.internalGeneticRun.strategy_id, this.internalGeneticRun.genetic_run_iterations[0].options).catch(e => e)
       this.setBestOptionsLoading = false
       if (this.$error(status, message, errors)) { return }
-      this.$emit('update:strategy', strategy)
+      this.strategy = strategy
     }
   }
 }
