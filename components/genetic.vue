@@ -180,6 +180,7 @@ export default {
       this.setBestOptionsLoading = false
       if (this.$error(status, message, errors)) { return }
       this.strategy = strategy
+      this.$noty.success('Successfully set options')
     }
   }
 }

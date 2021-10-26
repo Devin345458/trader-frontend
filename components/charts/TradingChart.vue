@@ -57,13 +57,13 @@ export default {
     chartTicks () {
       const data = [...this.ticks]
       return data.sort((a, b) => a.time - b.time).map((d) => {
-        return [d.openTimeInMillis, d.close, d.high, d.low, d.close, d.volume.toFixed(2)]
+        return [d.time, d.close, d.high, d.low, d.close, d.volume.toFixed(2)]
       })
     },
     chartVolume () {
       const data = [...this.ticks]
       return data.sort((a, b) => b.time - a.time).map((d) => {
-        return [d.openTimeInMillis, d.volume.toFixed(2)]
+        return [d.time, d.volume.toFixed(2)]
       })
     },
     chartTrades () {

@@ -19,6 +19,7 @@ export default {
         profile_id: null,
         type: 'Live',
         coin: null,
+        broker: null,
         options: {}
       }
     }

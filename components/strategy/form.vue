@@ -5,8 +5,14 @@
       <v-form ref="form">
         <v-select v-model="strategy.type" :items="types" label="Trade Type" :rules="rules.required" @change="strategy.profile_id = null" />
         <v-text-field v-model="strategy.name" label="Strategy Name" :rules="rules.required" />
+        <v-autocomplete
+          v-if="strategy.type && !edit"
+          v-model="strategy.broker"
+          label="Broker"
+          :items="brokers"
+        />
         <v-select
-          v-if="strategy.type === 'Live'"
+          v-if="strategy.broker && strategy.type === 'Live'"
           v-model="strategy.profile_id"
           :items="profiles"
           label="Profile"
@@ -18,8 +24,6 @@
         <v-autocomplete
           v-if="!edit"
           v-model="strategy.coin"
-          item-value="id"
-          item-text="id"
           :items="coins"
           :loading="coinsLoading"
           label="Coin"
@@ -115,7 +119,13 @@ export default {
         { text: 'Relative Strength Index', value: 'RelativeStrengthIndex' },
         { text: 'Performance Maximization', value: 'Pmax' },
         { text: 'Running Genetic', value: 'Genetic' },
+        { text: 'Neural Network', value: 'NeuralNetwork' },
+        { text: 'ML5 Neural Network', value: 'ML5NeuralNetwork' },
         { text: 'Every Tick', value: 'EveryTick' }
+      ],
+      brokers: [
+        { text: 'Coinbase Broker', value: 'CoinbaseBroker' },
+        { text: 'Alpaca Broker', value: 'AlpacaBroker' }
       ],
       types: [
         { text: 'Development - Paper Trading', value: 'Paper' },
@@ -137,6 +147,11 @@ export default {
     }
   },
   watch: {
+    'strategy.broker' (val) {
+      this.strategy.profile = null
+      this.loadCoins(val)
+      this.loadProfiles(val)
+    },
     'strategy.indicator' (val) {
       this.strategy.options = {}
       this.getOptions(val)
@@ -152,22 +167,18 @@ export default {
         this.getOptions(this.strategy.options.indicator, true)
       }
     })
-
-    this.loadCoins()
-    this.loadProfiles()
   },
   methods: {
-    async loadCoins () {
-      const paper = this.strategy.type === 'Paper'
+    async loadCoins (broker) {
       this.coinsLoading = true
-      const { data: { coins, message }, status } = await this.$axios.get(`/coinbase/coins/${paper}`).catch(e => e)
+      const { data: { coins, message }, status } = await this.$axios.get(`/brokers/coins/${broker}`).catch(e => e)
       this.coinsLoading = false
       if (this.$error(status, message)) { return }
       this.coins = coins
     },
-    async loadProfiles () {
+    async loadProfiles (broker) {
       this.profilesLoading = true
-      const { data: { profiles, message }, status } = await this.$axios.get(`/profiles/${this.strategy.type}`).catch(e => e)
+      const { data: { profiles, message }, status } = await this.$axios.get(`/profiles/${broker}`).catch(e => e)
       this.profilesLoading = false
       if (this.$error(status, message)) { return }
       this.profiles = profiles
