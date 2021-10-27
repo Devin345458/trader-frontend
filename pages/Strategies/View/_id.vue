@@ -77,7 +77,7 @@ export default {
       const base = this.strategy.coin.split('-')[1]
       const quote = this.strategy.coin.split('-')[0]
 
-      return `${base}: $${this.strategy?.position_info?.currentBuyCurrency}    ${quote}: ${this.strategy?.position_info?.currentSellCurrency?.quantity || 0}`
+      return `${base}: $${this.strategy?.position_info?.captial}    ${quote}: ${this.strategy?.position_info?.last_order?.quantity || 0}`
     }
   },
   created () {
