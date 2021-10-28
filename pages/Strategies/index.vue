@@ -17,6 +17,9 @@
           <template #item.status="{item}">
             {{ item.enabled ? 'Running' : 'Stopped' }}
           </template>
+          <template #item.broker="{item}">
+            {{ item.broker.substr(0, item.broker.indexOf('Broker')) }}
+          </template>
           <template #item.actions="{item}">
             <v-btn color="success" icon :to="'/strategies/view/' + item.id">
               <v-icon>mdi-eye</v-icon>
@@ -46,6 +49,7 @@ export default {
         { text: 'Status', value: 'status' },
         { text: 'Environment', value: 'type' },
         { text: 'Indicator', value: 'indicator' },
+        { text: 'Broker', value: 'broker' },
         { text: 'Coin', value: 'coin' },
         { text: 'Actions', value: 'actions' }
       ],

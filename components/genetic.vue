@@ -94,7 +94,7 @@ export default {
     profitPercentage () {
       if (!this.internalGeneticRun.genetic_run_iterations || !this.internalGeneticRun.genetic_run_iterations.length) { return false }
       const change = this.internalGeneticRun.genetic_run_iterations[0].profit_loss
-      return ((change + this.initial_balance) / this.initial_balance - 1) * 100
+      return (change / this.initial_balance) * 100
     },
     bestPNL () {
       return this.internalGeneticRun.perfect
