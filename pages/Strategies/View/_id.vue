@@ -74,10 +74,8 @@ export default {
       if (!this.strategy.coin) {
         return
       }
-      const base = this.strategy.coin.split('-')[1]
-      const quote = this.strategy.coin.split('-')[0]
 
-      return `${base}: $${this.strategy?.position_info?.captial}    ${quote}: ${this.strategy?.position_info?.last_order?.quantity || 0}`
+      return `Capital: $${this.strategy?.position_info?.captial || 0}    ${this.strategy.coin}: ${(this.strategy.position_info?.lastOrder?.quantity || 0).toFixed(2)}`
     }
   },
   created () {
