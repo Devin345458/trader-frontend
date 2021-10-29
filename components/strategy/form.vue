@@ -162,6 +162,9 @@ export default {
     }
   },
   mounted () {
+    if (this.strategy.broker) {
+      this.loadProfiles(this.strategy.broker)
+    }
     this.getOptions(this.strategy.indicator).then(() => {
       if (this.strategy.options.indicator) {
         this.getOptions(this.strategy.options.indicator, true)
