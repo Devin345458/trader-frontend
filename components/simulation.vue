@@ -147,12 +147,12 @@ export default {
           this.$noty.error(data.message)
           this.internal_value = false
           break
-        case 'indicator':
+        case 'indicators':
           data.forEach((indicator) => {
             if (!indicators[indicator.name]) {
               indicators[indicator.name] = []
             }
-            indicators[indicator.name].push({ time: indicator.time, indicator: indicator.indicator })
+            indicators[indicator.name].push(indicator)
           })
 
           for (const key in indicators) {

@@ -82,6 +82,7 @@ export default {
     },
     indicators: {
       handler () {
+        console.log('indicators changee')
         this.updateChart()
       },
       deep: true
@@ -128,17 +129,18 @@ export default {
       }
       if (this.indicators) {
         Object.keys(this.indicators).forEach((key) => {
-          const tmp = this.indicators[key].filter(a => a.indicator).sort((a, b) => a.time - b.time)
+          const tmp = this.indicators[key].filter(a => a.value).sort((a, b) => a.time - b.time)
           data.onchart.push({
             name: key,
             type: 'Spline',
-            data: tmp.map(a => [a.time * 1000, a.indicator]),
+            data: tmp.map(a => [a.time, a.value, a.color]),
             settings: {
               skipNaN: true
             }
           })
         })
       }
+      console.log(data)
       this.trading = new this.$DataCube(data)
     }
   }
