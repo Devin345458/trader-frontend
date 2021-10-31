@@ -22,7 +22,7 @@
             color="primary"
             :to="`/profiles/view/${item.id}`"
           >
-            <v-icon>mdi-eye</v-icon>
+            <v-icon>mdi-pencil</v-icon>
           </v-btn>
           <v-btn
             icon
@@ -38,6 +38,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'Index',
   data () {
@@ -45,6 +46,7 @@ export default {
       loading: true,
       headers: [
         { text: 'Name', value: 'name' },
+        { text: 'Broker', value: 'broker' },
         { text: 'Actions', value: 'actions' }
       ],
       profiles: []

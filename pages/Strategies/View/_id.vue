@@ -45,6 +45,7 @@
         <v-icon>mdi-play</v-icon>
       </v-btn>
     </v-card-title>
+    <strategy-chart v-if="strategy.coin" :strategy-id="$route.params.id" :coin="strategy.coin" />
     <strategy-trades :strategy-id="$route.params.id" />
     <strategy-logs :strategy-id="$route.params.id" />
     <strategy-genetic-run v-model="strategy" />
@@ -57,9 +58,10 @@ import Simulation from '~/components/simulation'
 import StrategyLogs from '~/components/strategy/StrategyLogs'
 import StrategyGeneticRun from '~/components/strategy/StrategyGeneticRun'
 import StrategyTrades from '~/components/strategy/StrategyTrades'
+import StrategyChart from '~/components/strategy/StrategyChart'
 export default {
   name: 'ViewStrategy',
-  components: { StrategyTrades, StrategyGeneticRun, StrategyLogs, Simulation },
+  components: { StrategyChart, StrategyTrades, StrategyGeneticRun, StrategyLogs, Simulation },
   data () {
     return {
       strategy: {

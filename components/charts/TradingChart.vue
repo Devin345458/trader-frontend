@@ -57,7 +57,7 @@ export default {
     chartTicks () {
       const data = [...this.ticks]
       return data.sort((a, b) => a.time - b.time).map((d) => {
-        return [d.time, d.close, d.high, d.low, d.close, d.volume.toFixed(2)]
+        return [d.time, d.close, d.high, d.low, d.close, Number(d.volume.toFixed(2))]
       })
     },
     chartVolume () {
@@ -82,7 +82,6 @@ export default {
     },
     indicators: {
       handler () {
-        console.log('indicators changee')
         this.updateChart()
       },
       deep: true
@@ -109,6 +108,7 @@ export default {
     updateChart () {
       const data = {
         chart: {
+          type: 'Spline',
           indexBased: this.indexBased,
           data: this.chartTicks
         },
@@ -129,18 +129,17 @@ export default {
       }
       if (this.indicators) {
         Object.keys(this.indicators).forEach((key) => {
-          const tmp = this.indicators[key].filter(a => a.value).sort((a, b) => a.time - b.time)
           data.onchart.push({
             name: key,
             type: 'Spline',
-            data: tmp.map(a => [a.time, a.value, a.color]),
+            data: this.indicators[key].map(a => [a.time, a.value]),
             settings: {
-              skipNaN: true
+              skipNaN: true,
+              color: this.indicators[key][0].color
             }
           })
         })
       }
-      console.log(data)
       this.trading = new this.$DataCube(data)
     }
   }

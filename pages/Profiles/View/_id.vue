@@ -5,9 +5,13 @@
       <v-card-text>
         <v-form>
           <v-text-field v-model="profile.name" label="Profile Name" :rules="rules.required" />
-          <v-text-field v-model="profile.api_key" label="Coin Base Api Key" :rules="rules.required" />
-          <v-text-field v-model="profile.api_phrase" label="Coin Base Api Phrase" :rules="rules.required" />
-          <v-text-field v-model="profile.api_secret" label="Coin Base Api Secret" :rules="rules.required" />
+          <v-autocomplete
+            v-model="profile.broker"
+            label="Broker"
+            :items="brokers"
+            :rules="rules.required"
+          />
+          <v-text-field v-for="field in fields" :key="field.field" v-model="profile[field.field]" :label="field.label" :rules="rules.required" />
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -38,14 +42,32 @@ export default {
   mixins: [validations],
   data () {
     return {
-      profilesLoading: false,
       loading: false,
-      profiles: [],
-      profile: {}
+      profile: {
+        name: undefined,
+        broker: undefined,
+        apiKey: undefined,
+        apiPhrase: undefined,
+        apiSecret: undefined
+      },
+      brokers: [
+        { text: 'Coinbase Broker', value: 'CoinbaseBroker' },
+        { text: 'Alpaca Broker', value: 'AlpacaBroker' }
+      ],
+      fields: []
     }
   },
   async fetch () {
     await this.loadProfile()
+  },
+  watch: {
+    async 'profile.broker' (val) {
+      this.loading = true
+      const { data: { fields, message, problems }, status } = await this.$axios.get('/brokers/fields/' + val).catch(e => e)
+      this.loading = false
+      if (this.$error(status, message, problems)) { return }
+      this.fields = fields
+    }
   },
   methods: {
     async remove () {

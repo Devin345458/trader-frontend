@@ -5,9 +5,13 @@
       <v-card-text>
         <v-form ref="form1">
           <v-text-field v-model="profile.name" label="Profile Name" :rules="rules.required" />
-          <v-text-field v-model="profile.cApiPhrase" label="Coin Base Api Phrase" :rules="rules.required" />
-          <v-text-field v-model="profile.cApiSecret" label="Coin Base Api Secret" :rules="rules.required" />
-          <v-text-field v-model="profile.cApiKey" label="Coin Base Api Key" :rules="rules.required" />
+          <v-autocomplete
+            v-model="profile.broker"
+            label="Broker"
+            :items="brokers"
+            :rules="rules.required"
+          />
+          <v-text-field v-for="field in fields" :key="field.field" v-model="profile[field.field]" :label="field.label" :rules="rules.required" />
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -33,13 +37,26 @@ export default {
     return {
       profile: {
         name: undefined,
-        coinProfileId: undefined,
-        cApiKey: undefined,
-        cApiPhrase: undefined,
-        cApiSecret: undefined
+        broker: undefined,
+        apiKey: undefined,
+        apiPhrase: undefined,
+        apiSecret: undefined
       },
-      profiles: [],
-      loading: false
+      brokers: [
+        { text: 'Coinbase Broker', value: 'CoinbaseBroker' },
+        { text: 'Alpaca Broker', value: 'AlpacaBroker' }
+      ],
+      loading: false,
+      fields: []
+    }
+  },
+  watch: {
+    async 'profile.broker' (val) {
+      this.loading = true
+      const { data: { fields, message, problems }, status } = await this.$axios.get('/brokers/fields/' + val).catch(e => e)
+      this.loading = false
+      if (this.$error(status, message, problems)) { return }
+      this.fields = fields
     }
   },
   methods: {
@@ -49,11 +66,6 @@ export default {
       this.loading = false
       if (this.$error(status, message, problems)) { return }
       await this.$router.push('/profiles')
-    },
-    next () {
-      if (!this.$refs.form1.validate()) { return }
-      this.loadProfiles()
-      this.phase = false
     }
   }
 }

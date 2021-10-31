@@ -157,9 +157,9 @@ export default {
 
           for (const key in indicators) {
             if (!this.indicators[key]) {
-              this.indicators[key] = []
+              this.$set(this.indicators, key, [])
             }
-            this.indicators[key] = this.indicators[key].concat(indicators[key])
+            this.$set(this.indicators, key, this.indicators[key].concat(indicators[key]))
           }
           break
         case 'holdProfits':
