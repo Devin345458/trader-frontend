@@ -44,7 +44,8 @@ export default {
       },
       brokers: [
         { text: 'Coinbase Broker', value: 'CoinbaseBroker' },
-        { text: 'Alpaca Broker', value: 'AlpacaBroker' }
+        { text: 'Alpaca Broker', value: 'AlpacaBroker' },
+        { text: 'KuCoin Broker', value: 'KuCoinBroker' }
       ],
       loading: false,
       fields: []

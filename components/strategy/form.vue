@@ -125,7 +125,8 @@ export default {
       ],
       brokers: [
         { text: 'Coinbase Broker', value: 'CoinbaseBroker' },
-        { text: 'Alpaca Broker', value: 'AlpacaBroker' }
+        { text: 'Alpaca Broker', value: 'AlpacaBroker' },
+        { text: 'KuCoin Broker', value: 'KuCoinBroker' }
       ],
       types: [
         { text: 'Development - Paper Trading', value: 'Paper' },
@@ -204,7 +205,7 @@ export default {
       }
 
       this.options.forEach((option) => {
-        if (option.default && !this.strategy.options[option.property]) {
+        if (option.default && this.strategy.options[option.property] === undefined) {
           this.strategy.options[option.property] = option.default
         }
       })
