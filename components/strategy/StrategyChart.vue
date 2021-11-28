@@ -9,6 +9,7 @@
             :width="cardWidth"
             :indicators="indicators"
             :coin="coin"
+            index-based
           />
         </v-card-text>
       </v-card>
