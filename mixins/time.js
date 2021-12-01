@@ -30,7 +30,7 @@ export default {
       return date.format('dddd, MMMM D, Y h:mm a')
     },
     short_date_time (time) {
-      const date = moment.parseZone(time)
+      const date = moment(time)
       if (!date.isValid()) {
         return ''
       }

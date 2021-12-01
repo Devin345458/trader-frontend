@@ -7,8 +7,8 @@
             :ticks="candles"
             :trades="trades"
             :width="cardWidth"
-            :indicators="indicators"
             :coin="coin"
+            :indicators="indicators"
             index-based
           />
         </v-card-text>

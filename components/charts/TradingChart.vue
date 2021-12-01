@@ -3,16 +3,15 @@
     v-if="trading"
     ref="tradingVue"
     toolbar
-    :overlays="overlays"
     :data="trading"
     :width="width"
     :title-txt="coin"
     :chart-config="chartConfig"
+    :timezone="-6"
   />
 </template>
 
 <script>
-import Overlays from 'tvjs-overlays'
 import moment from 'moment'
 export default {
   name: 'TradingChart',
@@ -45,7 +44,6 @@ export default {
   data () {
     return {
       trading: false,
-      overlays: [Overlays.VWMA, Overlays.EMA],
       chartConfig: {
         MAX_ZOOM: 5000,
         MIN_ZOOM: 0
@@ -110,13 +108,19 @@ export default {
         chart: {
           type: 'Spline',
           indexBased: this.indexBased,
-          data: this.chartTicks
+          data: this.chartTicks,
+          tf: '5m',
+          grid: {
+            id: (new Date()).valueOf()
+          }
         },
         onchart: [
           {
             name: 'Trades',
             type: 'Trades',
+            indexSrc: 'calc',
             data: this.chartTrades,
+            tf: '1s',
             settings: {
               color: '#f9ff14',
               legend: false,
@@ -132,6 +136,7 @@ export default {
           data.onchart.push({
             name: key,
             type: 'Spline',
+            indexSrc: 'calc',
             data: this.indicators[key].map(a => [a.time, a.value]),
             settings: {
               skipNaN: true,
