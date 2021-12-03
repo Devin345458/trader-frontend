@@ -3,14 +3,7 @@
     <v-col>
       <v-card ref="card">
         <v-card-text v-resize="onResize" cols="12">
-          <trading-chart
-            :ticks="candles"
-            :trades="trades"
-            :width="cardWidth"
-            :coin="coin"
-            :indicators="indicators"
-            index-based
-          />
+          <light-weight-chart ref="chart" :ticks="candles" :trades="trades" :indicators="indicators" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -18,10 +11,10 @@
 </template>
 
 <script>
-import TradingChart from '~/components/charts/TradingChart'
+import LightWeightChart from '~/components/charts/LightWeightChart'
 export default {
   name: 'StrategyChart',
-  components: { TradingChart },
+  components: { LightWeightChart },
   props: {
     strategyId: {
       type: [Number, String],
@@ -69,7 +62,7 @@ export default {
       this.candles = candles
 
       this.sockets.subscribe(`bot-socket:${val}|trade-candle`, (candle) => {
-        this.candles.push(candle)
+        this.$refs.chart.updatedTicks(candle)
       })
 
       if (oldVal) {
@@ -99,7 +92,7 @@ export default {
       }
 
       this.sockets.subscribe(`bot-socket:${val}|trade-indicator`, (indicator) => {
-        this.indicators[indicator.name].push(indicator)
+        this.$refs.chart.updateIndicator(indicator.name, indicator)
       })
 
       if (oldVal) {
