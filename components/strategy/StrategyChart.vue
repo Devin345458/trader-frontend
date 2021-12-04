@@ -2,8 +2,8 @@
   <v-row>
     <v-col>
       <v-card ref="card">
-        <v-card-text v-resize="onResize" cols="12">
-          <light-weight-chart ref="chart" :ticks="candles" :trades="trades" :indicators="indicators" />
+        <v-card-text class="pa-0" cols="12">
+          <light-weight-chart ref="chart" :ticks="candles" :trades="trades" :indicators="indicators" :coin="coin" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -115,8 +115,10 @@ export default {
         this.sockets.unsubscribe(`bot-socket:${oldVal}|trade`)
       }
     },
-    onResize () {
-      this.cardWidth = this.$refs.card.$el.offsetWidth - 32
+    refresh () {
+      this.loadCandles(this.strategyId, this.strategyId)
+      this.loadIndicators(this.strategyId, this.strategyId)
+      this.loadTrades(this.strategyId, this.strategyId)
     }
   }
 }

@@ -7,6 +7,8 @@
       {{ strategy.name }} - {{ strategy.coin }}
       <v-spacer />
       {{ currentBalance }}
+    </v-card-title>
+    <v-card-title>
       <v-spacer />
       <v-btn
         text
@@ -44,8 +46,18 @@
         Start Running
         <v-icon>mdi-play</v-icon>
       </v-btn>
+      <v-btn
+        v-if="strategy.type === 'Paper'"
+        text
+        color="yellow"
+        :loading="enableLoading"
+        @click="resetStrategy"
+      >
+        Reset Strategy
+        <v-icon>mdi-refresh</v-icon>
+      </v-btn>
     </v-card-title>
-    <strategy-chart v-if="strategy.coin" :strategy-id="$route.params.id" :coin="strategy.coin" />
+    <strategy-chart v-if="strategy.coin" ref="chart" :strategy-id="$route.params.id" :coin="strategy.coin" />
     <strategy-trades :strategy-id="$route.params.id" />
     <strategy-logs :strategy-id="$route.params.id" />
     <strategy-genetic-run v-model="strategy" />
@@ -77,7 +89,7 @@ export default {
         return
       }
 
-      return `Capital: $${this.strategy?.position_info?.captial || 0}    ${this.strategy.coin}: ${(this.strategy.position_info?.lastOrder?.quantity || 0).toFixed(2)}`
+      return `Capital: $${this.strategy?.position_info?.capital || 0}    ${this.strategy.coin}: ${(this.strategy.position_info?.lastOrder?.quantity || 0).toFixed(2)}`
     }
   },
   created () {
@@ -107,6 +119,14 @@ export default {
       this.enableLoading = false
       if (this.$error(status, message, errors)) { return }
       this.strategy.enabled = true
+    },
+    async resetStrategy () {
+      this.enableLoading = true
+      const { data: { strategy, message, errors }, status } = await this.$axios.put(`/strategies/reset/${this.$route.params.id}`).catch(e => e)
+      this.enableLoading = false
+      if (this.$error(status, message, errors)) { return }
+      this.$refs.chart.refresh()
+      this.strategy = strategy
     }
   }
 }
