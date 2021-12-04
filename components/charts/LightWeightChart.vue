@@ -79,8 +79,7 @@ export default {
     setCandles () {
       this.candles.setData(this.ticks.map((candle) => {
         candle = { ...candle }
-        const time = moment(candle.time).format('x')
-        candle.time = ((time / 1000) - (new Date().getTimezoneOffset() * 60))
+        candle.time = ((candle.time / 1000) - (new Date().getTimezoneOffset() * 60))
         return candle
       }))
     },
@@ -94,8 +93,7 @@ export default {
         }
         this.chartIndicators[key].setData(this.indicators[key].map((indicator) => {
           indicator = { ...indicator }
-          const time = moment(indicator.time).format('x')
-          indicator.time = ((time / 1000) - (new Date().getTimezoneOffset() * 60))
+          indicator.time = ((indicator.time / 1000) - (new Date().getTimezoneOffset() * 60))
           return indicator
         }))
         this.chartIndicators[key].applyOptions({ color: this.indicators[key][0].color })
@@ -130,16 +128,14 @@ export default {
       }).sort((a, b) => a.time - b.time))
     },
     updateTicks (candle) {
-      const zonedDate = new Date(new Date(candle.time).toLocaleString('en-US', { timeZone: 'America/Chicago' }))
-      candle.time = zonedDate.getTime() / 1000
+      candle.time = ((candle.time / 1000) - (new Date().getTimezoneOffset() * 60))
       this.candles.update(candle)
     },
     updateIndicator (indicator, data) {
       if (!this.chartIndicators[indicator]) {
         this.chartIndicators[indicator] = this.chart.addLineSeries()
       }
-      const zonedDate = new Date(new Date(indicator.time).toLocaleString('en-US', { timeZone: 'America/Chicago' }))
-      data.time = zonedDate.getTime() / 1000
+      data.time = ((data.time / 1000) - (new Date().getTimezoneOffset() * 60))
       this.chartIndicators[indicator].update(data)
     }
   }
