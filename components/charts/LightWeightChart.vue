@@ -98,20 +98,38 @@ export default {
     },
     setTrades () {
       this.candles.setMarkers(this.trades.map((trade) => {
+        let color
+        switch (trade.side) {
+          case 'buy':
+            color = 'green'
+            break
+          case 'sell':
+            color = 'red'
+            break
+          case 'buy short':
+            color = 'purple'
+            break
+          case 'sell short':
+            color = 'orange'
+            break
+        }
         return {
           time: new Date(trade.created_at).getTime() / 1000,
-          position: 'inBar',
-          color: trade.side.includes('buy') ? 'green' : 'red',
+          position: trade.side.includes('buy') ? 'aboveBar' : 'belowBar',
+          color,
           shape: 'circle',
-          size: 20
+          size: 10
         }
-      }))
+      }).sort((a, b) => a.time - b.time))
     },
-    updatedTicks (candle) {
+    updateTicks (candle) {
       candle.time = candle.time / 1000
       this.candles.update(candle)
     },
     updateIndicator (indicator, data) {
+      if (!this.chartIndicators[indicator]) {
+        this.chartIndicators[indicator] = this.chart.addLineSeries()
+      }
       data.time = data.time / 1000
       this.chartIndicators[indicator].update(data)
     }

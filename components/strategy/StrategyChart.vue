@@ -62,7 +62,7 @@ export default {
       this.candles = candles
 
       this.sockets.subscribe(`bot-socket:${val}|trade-candle`, (candle) => {
-        this.$refs.chart.updatedTicks(candle)
+        this.$refs.chart.updateTicks(candle)
       })
 
       if (oldVal) {

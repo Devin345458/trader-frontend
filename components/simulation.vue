@@ -17,13 +17,12 @@
           <v-currency-field v-model="initial_balance" :rules="rules.requiredNumber" prefix="$" label="Initial Balance" />
         </v-form>
       </v-card-text>
-      <v-card-text v-else v-resize="onResize">
-        <trading-chart
+      <v-card-text v-else>
+        <light-weight-chart
+          ref="chart"
           :ticks="candles"
           :trades="trades"
           :indicators="indicators"
-          :width="cardWidth"
-          :coin="strategy.coin"
         />
         <trades-table
           :trades="trades"
@@ -47,12 +46,12 @@
 
 <script>
 import moment from 'moment'
-import TradingChart from '~/components/charts/TradingChart'
 import validations from '~/mixins/validations'
 import TradesTable from '~/components/tables/TradesTable'
+import LightWeightChart from '~/components/charts/LightWeightChart'
 export default {
   name: 'Simulation',
-  components: { TradesTable, TradingChart },
+  components: { LightWeightChart, TradesTable },
   mixins: [validations],
   props: {
     value: {
@@ -105,9 +104,6 @@ export default {
     this.clear()
   },
   methods: {
-    onResize () {
-      this.cardWidth = this.$refs.card.$el.offsetWidth
-    },
     async runSim () {
       if (!this.$refs.simulation.validate()) { return }
       this.loading = true
