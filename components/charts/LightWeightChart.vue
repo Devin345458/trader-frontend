@@ -4,6 +4,7 @@
 
 <script>
 import { createChart } from 'lightweight-charts'
+import moment from 'moment'
 export default {
   name: 'LightWeightChart',
   props: {
@@ -77,7 +78,9 @@ export default {
     },
     setCandles () {
       this.candles.setData(this.ticks.map((candle) => {
-        candle.time = candle.time / 1000
+        candle = { ...candle }
+        const time = moment(candle.time).format('x')
+        candle.time = ((time / 1000) - (new Date().getTimezoneOffset() * 60))
         return candle
       }))
     },
@@ -90,7 +93,9 @@ export default {
           })
         }
         this.chartIndicators[key].setData(this.indicators[key].map((indicator) => {
-          indicator.time = indicator.time / 1000
+          indicator = { ...indicator }
+          const time = moment(indicator.time).format('x')
+          indicator.time = ((time / 1000) - (new Date().getTimezoneOffset() * 60))
           return indicator
         }))
         this.chartIndicators[key].applyOptions({ color: this.indicators[key][0].color })
@@ -113,8 +118,10 @@ export default {
             color = 'orange'
             break
         }
+        trade = { ...trade }
+        const time = moment(trade.created_at).format('x')
         return {
-          time: new Date(trade.created_at).getTime() / 1000,
+          time: ((time / 1000) - (new Date().getTimezoneOffset() * 60)),
           position: trade.side.includes('buy') ? 'aboveBar' : 'belowBar',
           color,
           shape: 'circle',
@@ -123,14 +130,16 @@ export default {
       }).sort((a, b) => a.time - b.time))
     },
     updateTicks (candle) {
-      candle.time = candle.time / 1000
+      const zonedDate = new Date(new Date(candle.time).toLocaleString('en-US', { timeZone: 'America/Chicago' }))
+      candle.time = zonedDate.getTime() / 1000
       this.candles.update(candle)
     },
     updateIndicator (indicator, data) {
       if (!this.chartIndicators[indicator]) {
         this.chartIndicators[indicator] = this.chart.addLineSeries()
       }
-      data.time = data.time / 1000
+      const zonedDate = new Date(new Date(indicator.time).toLocaleString('en-US', { timeZone: 'America/Chicago' }))
+      data.time = zonedDate.getTime() / 1000
       this.chartIndicators[indicator].update(data)
     }
   }
