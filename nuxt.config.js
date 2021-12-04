@@ -78,6 +78,9 @@ export default {
     watchLoggedIn: true,
     strategies: {
       local: {
+        token: {
+          maxAge: 60 * 60 * 24 * 7
+        },
         endpoints: {
           login: { url: process.env.BASE_URL + '/users/login', method: 'POST', propertyName: 'token', credentials: true },
           logout: { url: process.env.BASE_URL + '/users/logout', method: 'POST' },
