@@ -121,7 +121,7 @@ export default {
         trade = { ...trade }
         const time = moment(trade.created_at).format('x')
         return {
-          time: ((time / 1000) - (new Date().getTimezoneOffset() * 60)),
+          time: ((time / 1000) - (new Date().getTimezoneOffset() * 60)) - 60,
           position: trade.side.includes('buy') ? 'aboveBar' : 'belowBar',
           color,
           shape: 'circle',
