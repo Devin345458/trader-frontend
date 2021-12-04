@@ -121,7 +121,8 @@ export default {
         { text: 'Running Genetic', value: 'Genetic' },
         { text: 'Neural Network', value: 'NeuralNetwork' },
         { text: 'ML5 Neural Network', value: 'ML5NeuralNetwork' },
-        { text: 'Every Tick', value: 'EveryTick' }
+        { text: 'Every Tick', value: 'EveryTick' },
+        { text: 'RSI Stochastic Take Profit', value: 'RSIStochasticTakeProfit' }
       ],
       brokers: [
         { text: 'Coinbase Broker', value: 'CoinbaseBroker' },

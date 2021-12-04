@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 100%">
+  <div style="width: 100%; position: relative">
     <div class="chart-title">
       <div>{{ coin }}</div>
       <div v-if="selectedPrice" class="chart-tick-title">
