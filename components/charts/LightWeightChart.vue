@@ -202,6 +202,7 @@ export default {
     updateIndicator (indicator, data) {
       if (!this.chartIndicators[indicator]) {
         this.chartIndicators[indicator] = this.chart.addLineSeries()
+        this.chartIndicators[indicator].applyOptions({ color: data.color })
       }
       data.time = ((data.time / 1000) - (new Date().getTimezoneOffset() * 60))
       this.chartIndicators[indicator].update(data)

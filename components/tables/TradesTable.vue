@@ -51,6 +51,7 @@ export default {
         { text: 'Requested Price', value: 'requested_price' },
         { text: 'Price', value: 'price' },
         { text: 'Fees', value: 'fees' },
+        { text: 'Reason', value: 'reason' },
         { text: 'P&L', value: 'profitLoss' }
       ]
     }
