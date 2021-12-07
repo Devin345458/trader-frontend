@@ -22,6 +22,7 @@
           ref="chart"
           :ticks="candles"
           :trades="trades"
+          :coin="strategy.coin"
           :indicators="indicators"
         />
         <trades-table

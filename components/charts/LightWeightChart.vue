@@ -9,7 +9,7 @@
 
     <div class="char-indicators-title">
       <div v-for="(value, indicator) in selectedIndicatorsPrice" :key="indicator">
-        {{ indicator }}: <span :style="{color: indicators[indicator][0].color}">{{ value.toFixed(5) }}</span>
+        {{ indicator }}: <span :style="{color: indicators[indicator][0].color}">{{ value ? value.toFixed(5) : undefined }}</span>
       </div>
     </div>
     <div ref="chart" v-resize="handleResize" class="chart-wrapper" style="width: 100%" />
@@ -140,9 +140,17 @@ export default {
         if (!this.selectedPrice) {
           this.selectedPrice = this.lastPrice
         }
+      } else {
+        this.lastPrice = {}
+        this.selectedPrice = {}
       }
     },
     setIndicators () {
+      for (const key in this.chartIndicators) {
+        this.chartIndicators[key].setData([])
+        delete this.selectedIndicatorsPrice[key]
+        delete this.indicatorsLastPrice[key]
+      }
       Object.keys(this.indicators).forEach((key) => {
         if (!this.chartIndicators[key]) {
           this.chartIndicators[key] = this.chart.addLineSeries({

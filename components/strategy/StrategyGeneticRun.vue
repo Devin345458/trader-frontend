@@ -23,7 +23,7 @@
             :headers="headers"
           >
             <template #item.created_at="{item}">
-              {{ formatTime(item.created_at) }}
+              {{ short_date_time((new Date(item.created_at).valueOf() / 1000) - (new Date().getTimezoneOffset() * 60) ) }}
             </template>
             <template #item.actions="{item}">
               <v-btn
@@ -55,12 +55,13 @@
 </template>
 
 <script>
-import moment from 'moment-timezone'
 import Genetic from '~/components/genetic'
 import { replaceItemByFieldToArray } from '~/utils/utils'
+import time from '~/mixins/time'
 export default {
   name: 'StrategyGeneticRun',
   components: { Genetic },
+  mixins: [time],
   props: {
     value: {
       type: Object,
@@ -129,9 +130,6 @@ export default {
       if (this.$error(status, message, errors)) {
         this.geneticRuns.splice(tmp.indexOf(id), 0, holding)
       }
-    },
-    formatTime (time) {
-      return moment.utc(time.replace('-05:00', '')).local().fromNow()
     }
   }
 }
