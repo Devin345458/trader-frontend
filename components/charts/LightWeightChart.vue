@@ -9,7 +9,7 @@
 
     <div class="char-indicators-title">
       <div v-for="(value, indicator) in selectedIndicatorsPrice" :key="indicator">
-        {{ indicator }}: <span :style="{color: indicators[indicator][0].color}">{{ value ? value.toFixed(5) : undefined }}</span>
+        {{ indicator }}: <span :style="{color: indicators[indicator][0].settings.color}">{{ value ? value.toFixed(5) : undefined }}</span>
       </div>
     </div>
     <div ref="chart" v-resize="handleResize" class="chart-wrapper" style="width: 100%" />
@@ -48,13 +48,22 @@ export default {
       lastPrice: undefined,
       indicatorsLastPrice: {},
       selectedIndicatorsPrice: {},
-      volumes: undefined
+      volumes: undefined,
+      markers: []
     }
   },
   watch: {
     ticks: 'setCandles',
     indicators: 'setIndicators',
-    trades: 'setTrades'
+    trades: 'setTrades',
+    markers () {
+      const markers = []
+      this.markers.forEach(marker => markers.push(marker.marker))
+      markers.forEach((m) => {
+        m.time = this.convertTimeToSeconds(m.time)
+      })
+      this.candles.setMarkers(markers)
+    }
   },
   mounted () {
     /** @var this.chart IChartApi **/
@@ -66,14 +75,23 @@ export default {
         lineColor: '#303240',
         textColor: '#D9D9D9'
       },
+      localization: {
+        timeFormatter: (time) => {
+          return moment.utc((time - new Date().getTimezoneOffset() * 60) * 1000).format('DD MMM hh:mm a')
+        }
+      },
       timeScale: {
-        timeVisible: true
+        timeVisible: true,
+        tickMarkFormatter: (time) => {
+          return moment.utc((time - new Date().getTimezoneOffset() * 60) * 1000).format('hh:mm a')
+        }
       },
       watermark: {
         color: 'rgba(0, 0, 0, 0)'
       },
       crosshair: {
-        color: '#758696'
+        color: '#758696',
+        mode: 0
       },
       grid: {
         vertLines: {
@@ -89,17 +107,6 @@ export default {
       bottomColor: 'rgba(32, 226, 47, 0.04)',
       lineColor: 'rgba(32, 226, 47, 1)',
       name: 'candles'
-    })
-    this.volumes = this.chart.addHistogramSeries({
-      color: '#26a69a',
-      priceFormat: {
-        type: 'volume'
-      },
-      priceScaleId: '',
-      scaleMargins: {
-        top: 0.8,
-        bottom: 0
-      }
     })
     this.setCandles()
     this.setTrades()
@@ -117,6 +124,7 @@ export default {
         })
       }
     })
+    this.chart.timeScale().fitContent()
   },
   methods: {
     handleResize () {
@@ -125,16 +133,21 @@ export default {
       }
     },
     setCandles () {
-      this.candles.setData(this.ticks.map((candle) => {
-        candle = { ...candle }
-        candle.time = ((candle.time / 1000) - (new Date().getTimezoneOffset() * 60))
-        return candle
-      }))
-      this.volumes.setData(this.ticks.map((candle) => {
-        candle = { ...candle }
-        candle.time = ((candle.time / 1000) - (new Date().getTimezoneOffset() * 60))
-        return { time: candle.time, value: candle.volume }
-      }))
+      const candles = this.cleanData(this.ticks)
+      console.log(candles.map((candle, index) => {
+        if (index === 0) {
+          return false
+        }
+        if (candle.time < candles[index - 1].time) {
+          return [candle.time, candles[index - 1].time, 'out_of_order']
+        }
+        if (candle.time - candles[index - 1].time > 60000) {
+          return [candle.time, candles[index - 1].time, 'gap']
+        }
+
+        return false
+      }).filter(a => a))
+      this.candles.setData(candles)
       if (this.ticks.length) {
         this.lastPrice = this.ticks[this.ticks.length - 1]
         if (!this.selectedPrice) {
@@ -146,6 +159,7 @@ export default {
       }
     },
     setIndicators () {
+      // Clean data
       for (const key in this.chartIndicators) {
         this.chartIndicators[key].setData([])
         delete this.selectedIndicatorsPrice[key]
@@ -153,25 +167,31 @@ export default {
       }
       Object.keys(this.indicators).forEach((key) => {
         if (!this.chartIndicators[key]) {
-          this.chartIndicators[key] = this.chart.addLineSeries({
-            lastValueVisible: false,
-            priceLineVisible: false
-          })
-        }
-        this.chartIndicators[key].setData(this.indicators[key].map((indicator) => {
-          indicator = { ...indicator }
-          indicator.time = ((indicator.time / 1000) - (new Date().getTimezoneOffset() * 60))
-          return indicator
-        }))
-        this.chartIndicators[key].applyOptions({ color: this.indicators[key][0].color })
-        this.indicatorsLastPrice[key] = this.indicators[key][this.indicators[key].length - 1].value
-        if (!this.selectedIndicatorsPrice[key]) {
-          this.selectedIndicatorsPrice[key] = this.indicatorsLastPrice[key]
+          if (this.indicators[key][0].settings?.type === 'marker') {
+            this.markers = this.markers.filter(marker => marker.type !== key)
+            this.markers = this.markers.concat(this.indicators[key].map((indicator) => {
+              return {
+                marker: Object.assign(indicator.settings, { time: this.convertTimeToSeconds(indicator.time) }),
+                type: key
+              }
+            }))
+          } else {
+            this.chartIndicators[key] = this.chart.addLineSeries(Object.assign(this.indicators[key][0].settings, { lastValueVisible: false, priceLineVisible: false }))
+            this.chartIndicators[key].setData(this.cleanData(this.indicators[key]))
+            this.chartIndicators[key].applyOptions({ color: this.indicators[key][0].color })
+            this.indicatorsLastPrice[key] = this.indicators[key][this.indicators[key].length - 1].value
+            if (!this.selectedIndicatorsPrice[key]) {
+              this.selectedIndicatorsPrice[key] = this.indicatorsLastPrice[key]
+            }
+          }
         }
       })
     },
     setTrades () {
-      this.candles.setMarkers(this.trades.map((trade) => {
+      this.markers = this.markers.filter((marker) => {
+        return marker.type !== 'trade'
+      })
+      this.markers = this.markers.concat(this.trades.map((trade) => {
         let color
         switch (trade.side) {
           case 'buy':
@@ -188,33 +208,77 @@ export default {
             break
         }
         trade = { ...trade }
-        const time = moment(trade.created_at).format('x')
         return {
-          time: ((time / 1000) - (new Date().getTimezoneOffset() * 60)) - 60,
-          position: trade.side.includes('buy') ? 'aboveBar' : 'belowBar',
-          color,
-          shape: 'circle',
-          size: '2px'
+          marker: {
+            time: this.convertTimeToSeconds(trade.candle_time),
+            position: trade.side.includes('buy') ? 'aboveBar' : 'belowBar',
+            color,
+            shape: 'circle',
+            size: '2px'
+          },
+          type: 'trade'
         }
       }).sort((a, b) => a.time - b.time))
     },
     updateTicks (candle) {
-      candle.time = ((candle.time / 1000) - (new Date().getTimezoneOffset() * 60))
+      candle = { ...candle }
+      candle.time = this.convertTimeToSeconds(candle.time)
+      // console.log(candle.time, this.cleanData(this.ticks).slice(-1)[0])
       this.candles.update(candle)
-      this.volumes.update({ time: candle.time, value: candle.volume })
       this.lastPrice = candle
       if (!this.selectedPrice) {
         this.selectedPrice = candle
       }
     },
     updateIndicator (indicator, data) {
-      if (!this.chartIndicators[indicator]) {
-        this.chartIndicators[indicator] = this.chart.addLineSeries()
-        this.chartIndicators[indicator].applyOptions({ color: data.color })
+      data.time = this.convertTimeToSeconds(data.time)
+      if (data.settings.type === 'marker') {
+        this.markers.push({
+          marker: Object.assign(data.settings, { time: data.time }),
+          type: indicator
+        })
+      } else {
+        if (!this.chartIndicators[indicator]) {
+          this.chartIndicators[indicator] = this.chart.addLineSeries(Object.assign(data.settings, { lastValueVisible: false, priceLineVisible: false }))
+          this.chartIndicators[indicator].applyOptions({ color: data.color })
+        }
+        console.log(data.time, this.cleanData(this.indicators[indicator]).slice(-1)[0].time)
+        this.chartIndicators[indicator].update(data)
+        this.indicatorsLastPrice[indicator] = data.value
       }
-      data.time = ((data.time / 1000) - (new Date().getTimezoneOffset() * 60))
-      this.chartIndicators[indicator].update(data)
-      this.indicatorsLastPrice[indicator] = data.value
+    },
+    convertTimeToSeconds (time) {
+      if (time > 9999999999) {
+        time = time / 1000
+      }
+
+      return time
+    },
+    cleanData (arr) {
+      if (arr.length < 2) {
+        return []
+      }
+      const interval = arr.slice(-1)[0].time - arr.slice(-2)[0].time
+      arr = [...new Set(arr)]
+      arr.forEach((candle, index) => {
+        if (index === 0) {
+          return
+        }
+        const diff = candle.time - arr[index - 1].time
+        if (diff > interval) {
+          let sum = 0
+          while (sum < diff) {
+            arr.splice(index, 0, {
+              time: arr[index - 1].time + interval
+            })
+            sum += interval
+          }
+        }
+      })
+      arr.forEach((i) => {
+        i.time = this.convertTimeToSeconds(i.time)
+      })
+      return arr
     }
   }
 }

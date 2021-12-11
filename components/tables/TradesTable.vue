@@ -10,8 +10,8 @@
         :items="trades"
         :headers="headers"
       >
-        <template #item.created_at="{item}">
-          {{ short_date_time(item.created_at) }}
+        <template #item.candle_time="{item}">
+          {{ short_date_time(item.candle_time) }}
         </template>
         <template #item.profitLoss="{item}">
           {{ item.profit_loss? '$' + item.profit_loss.toFixed(2): '' }}
@@ -46,7 +46,7 @@ export default {
       headers: [
         { text: 'Side', value: 'side' },
         { text: 'Market', value: 'currency' },
-        { text: 'Time', value: 'created_at' },
+        { text: 'Time', value: 'candle_time' },
         { text: 'Size', value: 'quantity' },
         { text: 'Requested Price', value: 'requested_price' },
         { text: 'Price', value: 'price' },

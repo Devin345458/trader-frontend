@@ -123,7 +123,8 @@ export default {
         { text: 'ML5 Neural Network', value: 'ML5NeuralNetwork' },
         { text: 'Every Tick', value: 'EveryTick' },
         { text: 'RSI Stochastic Take Profit', value: 'RSIStochasticTakeProfit' },
-        { text: 'Fib Retracement', value: 'FibRetracement' }
+        // { text: 'Fib Retracement', value: 'FibRetracement' },
+        { text: 'Mean Reversion', value: 'MeanReversion' }
       ],
       brokers: [
         { text: 'Coinbase Broker', value: 'CoinbaseBroker' },

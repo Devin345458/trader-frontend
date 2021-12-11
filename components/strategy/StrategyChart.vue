@@ -34,7 +34,6 @@ export default {
       cardWidth: 500
     }
   },
-
   watch: {
     strategyId: {
       async handler (val, oldVal) {
