@@ -3,7 +3,7 @@ export default {
     return {
       rules: {
         required: [
-          v => !!v || v === 0 || 'Field is required'
+          v => (!!v || v === false) || v === 0 || 'Field is required'
         ],
         name: [
           v => !!v || 'Name is required',

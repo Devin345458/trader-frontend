@@ -64,6 +64,13 @@
             :label="option.label"
             :rules="option.required? rules.required: []"
           />
+          <v-checkbox
+            v-else-if="option.type === 'boolean'"
+            :key="option.property"
+            v-model.number="strategy.options[option.property]"
+            :label="option.label"
+            :rules="option.required? rules.required: []"
+          />
           <v-text-field
             v-else
             :key="option.property"

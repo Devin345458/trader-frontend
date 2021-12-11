@@ -62,7 +62,7 @@ export default {
       markers.forEach((m) => {
         m.time = this.convertTimeToSeconds(m.time)
       })
-      this.candles.setMarkers(markers)
+      this.candles.setMarkers(markers.sort((a, b) => a.time - b.time))
     }
   },
   mounted () {
@@ -134,19 +134,6 @@ export default {
     },
     setCandles () {
       const candles = this.cleanData(this.ticks)
-      console.log(candles.map((candle, index) => {
-        if (index === 0) {
-          return false
-        }
-        if (candle.time < candles[index - 1].time) {
-          return [candle.time, candles[index - 1].time, 'out_of_order']
-        }
-        if (candle.time - candles[index - 1].time > 60000) {
-          return [candle.time, candles[index - 1].time, 'gap']
-        }
-
-        return false
-      }).filter(a => a))
       this.candles.setData(candles)
       if (this.ticks.length) {
         this.lastPrice = this.ticks[this.ticks.length - 1]
@@ -218,7 +205,7 @@ export default {
           },
           type: 'trade'
         }
-      }).sort((a, b) => a.time - b.time))
+      }))
     },
     updateTicks (candle) {
       candle = { ...candle }
@@ -242,7 +229,6 @@ export default {
           this.chartIndicators[indicator] = this.chart.addLineSeries(Object.assign(data.settings, { lastValueVisible: false, priceLineVisible: false }))
           this.chartIndicators[indicator].applyOptions({ color: data.color })
         }
-        console.log(data.time, this.cleanData(this.indicators[indicator]).slice(-1)[0].time)
         this.chartIndicators[indicator].update(data)
         this.indicatorsLastPrice[indicator] = data.value
       }
@@ -267,18 +253,20 @@ export default {
         const diff = candle.time - arr[index - 1].time
         if (diff > interval) {
           let sum = 0
-          while (sum < diff) {
-            arr.splice(index, 0, {
-              time: arr[index - 1].time + interval
+          let count = 0
+          while (sum < diff - interval) {
+            arr.splice(index + count, 0, {
+              time: arr[index + count - 1].time + interval
             })
             sum += interval
+            count++
           }
         }
       })
       arr.forEach((i) => {
         i.time = this.convertTimeToSeconds(i.time)
       })
-      return arr
+      return arr.sort((a, b) => a.time - b.time)
     }
   }
 }
