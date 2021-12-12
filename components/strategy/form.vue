@@ -131,7 +131,8 @@ export default {
         { text: 'Every Tick', value: 'EveryTick' },
         { text: 'RSI Stochastic Take Profit', value: 'RSIStochasticTakeProfit' },
         { text: 'Mean Reversion', value: 'MeanReversion' },
-        { text: 'T3 Cross', value: 'T3Cross' }
+        { text: 'T3 Cross', value: 'T3Cross' },
+        { text: 'MACD Cross', value: 'MacdCross' }
       ],
       brokers: [
         { text: 'Coinbase Broker', value: 'CoinbaseBroker' },

@@ -75,16 +75,21 @@
           </v-tabs-items>
         </v-col>
         <v-col cols="12" lg="6">
-          <v-card v-for="strategy in strategies" :key="strategy.id" flat tile>
-            <v-card-title>
-              <status-bubble :online="!!strategy.enabled" />
-              {{ strategy.name }}
-              <v-spacer />
-              <v-btn icon :to="'/strategies/view/' + strategy.id">
-                <v-icon>mdi-cog</v-icon>
-              </v-btn>
-            </v-card-title>
-          </v-card>
+          <v-container>
+            <h3 class="white--text" style="line-height: 56px">Strategy Status</h3>
+          </v-container>
+          <div style="height: 400px; overflow-y: scroll">
+            <v-card v-for="strategy in strategies" :key="strategy.id" flat tile>
+              <v-card-title>
+                <status-bubble :online="!!strategy.enabled" />
+                {{ strategy.name }}
+                <v-spacer />
+                <v-btn icon :to="'/strategies/view/' + strategy.id">
+                  <v-icon>mdi-cog</v-icon>
+                </v-btn>
+              </v-card-title>
+            </v-card>
+          </div>
         </v-col>
       </v-row>
     </v-container>
