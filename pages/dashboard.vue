@@ -18,7 +18,20 @@
       <v-row>
         <v-col cols="12">
           <v-container>
-            <h3 class="mb-4" style="color: #4B4CE2; font-size: 55px ">You're <span style="color: #32C47C">up {{ percent.toFixed(2) }}% </span>today</h3>
+            <v-row class="ma-0 align-center">
+              <h3 class="mb-4" style="color: #4B4CE2; font-size: 55px ">You're <span style="color: #32C47C">up {{ percent.toFixed(2) }}% </span>today</h3>
+              <v-spacer />
+              <v-btn-toggle v-model="type" group tile>
+                <v-btn value="live">
+                  Live
+                </v-btn>
+                <v-btn
+                  value="paper"
+                >
+                  Paper
+                </v-btn>
+              </v-btn-toggle>
+            </v-row>
             <v-row>
               <v-col cols="12" lg="6">
                 <v-card color="#7267F5">
@@ -87,7 +100,7 @@ export default {
   components: { StatusBubble, LightWeightChart },
   data () {
     return {
-      type: 'paper',
+      type: 'live',
       percent: 0,
       amount: 0,
       total: 0,
@@ -143,6 +156,12 @@ export default {
       return {
         profits
       }
+    }
+  },
+  watch: {
+    type () {
+      this.getStrategies()
+      this.getTradingPNL()
     }
   },
   mounted () {
