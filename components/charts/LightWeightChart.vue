@@ -91,7 +91,7 @@ export default {
       },
       crosshair: {
         color: '#758696',
-        mode: 0
+        mode: 1
       },
       grid: {
         vertLines: {
