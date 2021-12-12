@@ -1,7 +1,8 @@
 <template>
-  <v-app dark>
+  <v-app id="main-app" dark>
     <v-navigation-drawer
-      v-model="drawer"
+      v-if="$vuetify.breakpoint.mdAndUp"
+      permanent
       fixed
       :color="$vuetify.theme.dark? '#121D27' : '#F5F6F8'"
       app
@@ -38,6 +39,7 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar
+      v-if="$vuetify.breakpoint.mdAndUp"
       fixed
       app
       :color="$vuetify.theme.dark? '#121D27' : '#F5F6F8'"
@@ -51,9 +53,15 @@
     <v-main>
       <nuxt />
     </v-main>
-    <v-footer app color="#060D13">
-      <span>&copy; {{ new Date().getFullYear() }}</span>
-    </v-footer>
+    <v-bottom-navigation
+      v-if="$vuetify.breakpoint.smAndDown"
+      app
+    >
+      <v-btn v-for="(item, i) in items" :key="i" :to="item.to">
+        {{ item.title }}
+        <v-icon>{{ item.icon }}</v-icon>
+      </v-btn>
+    </v-bottom-navigation>
   </v-app>
 </template>
 
@@ -75,14 +83,14 @@ export default {
           to: '/profiles'
         },
         {
-          icon: 'mdi-cog-outline',
-          title: 'Settings',
-          to: '/settings'
-        },
-        {
           icon: 'mdi-strategy',
           title: 'Strategies',
           to: '/strategies'
+        },
+        {
+          icon: 'mdi-cog-outline',
+          title: 'Settings',
+          to: '/settings'
         }
       ],
       title: 'Coin Base Trader'

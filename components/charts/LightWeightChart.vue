@@ -153,24 +153,30 @@ export default {
         delete this.indicatorsLastPrice[key]
       }
       Object.keys(this.indicators).forEach((key) => {
-        if (!this.chartIndicators[key]) {
-          if (this.indicators[key][0].settings?.type === 'marker') {
-            this.markers = this.markers.filter(marker => marker.type !== key)
-            this.markers = this.markers.concat(this.indicators[key].map((indicator) => {
-              return {
-                marker: Object.assign(indicator.settings, { time: this.convertTimeToSeconds(indicator.time) }),
-                type: key
-              }
-            }))
-          } else {
-            this.chartIndicators[key] = this.chart.addLineSeries(Object.assign(this.indicators[key][0].settings, { lastValueVisible: false, priceLineVisible: false }))
-            this.chartIndicators[key].setData(this.cleanData(this.indicators[key]))
-            this.chartIndicators[key].applyOptions({ color: this.indicators[key][0].color })
-            this.indicatorsLastPrice[key] = this.indicators[key][this.indicators[key].length - 1].value
-            if (!this.selectedIndicatorsPrice[key]) {
-              this.selectedIndicatorsPrice[key] = this.indicatorsLastPrice[key]
+        if (!this.indicators[key].length) {
+          return
+        }
+        if (this.indicators[key][0].settings?.type === 'marker') {
+          this.markers = this.markers.filter(marker => marker.type !== key)
+          this.markers = this.markers.concat(this.indicators[key].map((indicator) => {
+            return {
+              marker: Object.assign(indicator.settings, { time: this.convertTimeToSeconds(indicator.time) }),
+              type: key
             }
-          }
+          }))
+          return
+        }
+        if (!this.chartIndicators[key]) {
+          this.chartIndicators[key] = this.chart.addLineSeries(Object.assign(this.indicators[key][0].settings, {
+            lastValueVisible: false,
+            priceLineVisible: false
+          }))
+        }
+        this.chartIndicators[key].setData(this.cleanData(this.indicators[key]))
+        this.chartIndicators[key].applyOptions({ color: this.indicators[key][0].color })
+        this.indicatorsLastPrice[key] = this.indicators[key][this.indicators[key].length - 1].value
+        if (!this.selectedIndicatorsPrice[key]) {
+          this.selectedIndicatorsPrice[key] = this.indicatorsLastPrice[key]
         }
       })
     },
