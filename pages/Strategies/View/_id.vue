@@ -60,7 +60,7 @@
     <strategy-chart v-if="strategy.coin" ref="chart" :strategy-id="$route.params.id" :coin="strategy.coin" />
     <strategy-trades :strategy-id="$route.params.id" />
     <strategy-logs :strategy-id="$route.params.id" />
-    <strategy-genetic-run v-model="strategy" />
+    <strategy-genetic-run v-if="strategy.indicator !== 'Genetic'" v-model="strategy" />
     <simulation v-model="simulationModal" :strategy="strategy" />
   </v-container>
 </template>

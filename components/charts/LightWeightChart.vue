@@ -9,7 +9,9 @@
 
     <div class="char-indicators-title">
       <div v-for="(value, indicator) in selectedIndicatorsPrice" :key="indicator">
-        {{ indicator }}: <span :style="{color: indicators[indicator][0].settings.color}">{{ value ? value.toFixed(5) : undefined }}</span>
+        <template v-if="indicators[indicator][0].settings.type !== 'marker'">
+          {{ indicator }}: <span :style="{color: indicators[indicator][0].settings.color}">{{ value ? value.toFixed(5) : undefined }}</span>
+        </template>
       </div>
     </div>
     <div ref="chart" v-resize="handleResize" class="chart-wrapper" style="width: 100%" />
@@ -37,6 +39,10 @@ export default {
     coin: {
       type: String,
       default: undefined
+    },
+    skipValidation: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -91,7 +97,7 @@ export default {
       },
       crosshair: {
         color: '#758696',
-        mode: 1
+        mode: 0
       },
       grid: {
         vertLines: {
@@ -247,28 +253,31 @@ export default {
       return time
     },
     cleanData (arr) {
-      if (arr.length < 2) {
-        return []
-      }
-      const interval = arr.slice(-1)[0].time - arr.slice(-2)[0].time
       arr = [...new Set(arr)]
-      arr.forEach((candle, index) => {
-        if (index === 0) {
-          return
-        }
-        const diff = candle.time - arr[index - 1].time
-        if (diff > interval) {
-          let sum = 0
-          let count = 0
-          while (sum < diff - interval) {
-            arr.splice(index + count, 0, {
-              time: arr[index + count - 1].time + interval
-            })
-            sum += interval
-            count++
+      if (arr.length < 2) {
+        return arr
+      }
+
+      if (!this.skipValidation) {
+        const interval = arr.slice(-1)[0].time - arr.slice(-2)[0].time
+        arr.forEach((candle, index) => {
+          if (index === 0) {
+            return
           }
-        }
-      })
+          const diff = candle.time - arr[index - 1].time
+          if (diff > interval) {
+            let sum = 0
+            let count = 0
+            while (sum < diff - interval) {
+              arr.splice(index + count, 0, {
+                time: arr[index + count - 1].time + interval
+              })
+              sum += interval
+              count++
+            }
+          }
+        })
+      }
       arr.forEach((i) => {
         i.time = this.convertTimeToSeconds(i.time)
       })
