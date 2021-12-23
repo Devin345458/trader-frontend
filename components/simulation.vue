@@ -20,7 +20,7 @@
       <v-card-text v-else>
         <light-weight-chart
           ref="chart"
-          :skip-validation="strategy.indicator === 'Genetic'"
+          skip-validation
           :ticks="candles"
           :trades="trades"
           :coin="strategy.coin"

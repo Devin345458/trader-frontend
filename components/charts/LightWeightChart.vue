@@ -10,7 +10,7 @@
     <div class="char-indicators-title">
       <div v-for="(value, indicator) in selectedIndicatorsPrice" :key="indicator">
         <template v-if="indicators[indicator][0].settings.type !== 'marker'">
-          {{ indicator }}: <span :style="{color: indicators[indicator][0].settings.color}">{{ value ? value.toFixed(5) : undefined }}</span>
+          {{ indicator }}: <span :style="{color: indicators[indicator][0].settings.color}">{{ value ? value : undefined }}</span>
         </template>
       </div>
     </div>
@@ -60,7 +60,10 @@ export default {
   },
   watch: {
     ticks: 'setCandles',
-    indicators: 'setIndicators',
+    indicators: {
+      handler: 'setIndicators',
+      deep: true
+    },
     trades: 'setTrades',
     markers () {
       const markers = []
@@ -152,6 +155,7 @@ export default {
       }
     },
     setIndicators () {
+      console.log('indicator update')
       // Clean data
       for (const key in this.chartIndicators) {
         this.chartIndicators[key].setData([])
@@ -173,12 +177,14 @@ export default {
           return
         }
         if (!this.chartIndicators[key]) {
+          console.log('not found')
           this.chartIndicators[key] = this.chart.addLineSeries(Object.assign(this.indicators[key][0].settings, {
             lastValueVisible: false,
             priceLineVisible: false
           }))
         }
         this.chartIndicators[key].setData(this.cleanData(this.indicators[key]))
+        console.log('setting data')
         this.chartIndicators[key].applyOptions({ color: this.indicators[key][0].color })
         this.indicatorsLastPrice[key] = this.indicators[key][this.indicators[key].length - 1].value
         if (!this.selectedIndicatorsPrice[key]) {

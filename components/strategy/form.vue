@@ -132,7 +132,9 @@ export default {
         { text: 'RSI Stochastic Take Profit', value: 'RSIStochasticTakeProfit' },
         { text: 'Mean Reversion', value: 'MeanReversion' },
         { text: 'T3 Cross', value: 'T3Cross' },
-        { text: 'MACD Cross', value: 'MACDCross' }
+        { text: 'MACD Cross', value: 'MACDCross' },
+        { text: 'Arima', value: 'Arima' },
+        { text: 'BasicNeural', value: 'BasicNeural' }
       ],
       brokers: [
         { text: 'Coinbase Broker', value: 'CoinbaseBroker' },
