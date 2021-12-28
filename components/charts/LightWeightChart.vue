@@ -155,7 +155,6 @@ export default {
       }
     },
     setIndicators () {
-      console.log('indicator update')
       // Clean data
       for (const key in this.chartIndicators) {
         this.chartIndicators[key].setData([])
@@ -177,14 +176,12 @@ export default {
           return
         }
         if (!this.chartIndicators[key]) {
-          console.log('not found')
           this.chartIndicators[key] = this.chart.addLineSeries(Object.assign(this.indicators[key][0].settings, {
             lastValueVisible: false,
             priceLineVisible: false
           }))
         }
         this.chartIndicators[key].setData(this.cleanData(this.indicators[key]))
-        console.log('setting data')
         this.chartIndicators[key].applyOptions({ color: this.indicators[key][0].color })
         this.indicatorsLastPrice[key] = this.indicators[key][this.indicators[key].length - 1].value
         if (!this.selectedIndicatorsPrice[key]) {

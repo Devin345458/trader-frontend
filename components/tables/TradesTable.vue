@@ -11,7 +11,7 @@
         :headers="headers"
       >
         <template #item.candle_time="{item}">
-          {{ short_date_time(item.candle_time) }}
+          {{ short_date_time(convertTimeToSeconds(item.candle_time)) }}
         </template>
         <template #item.profitLoss="{item}">
           {{ item.profit_loss? '$' + item.profit_loss.toFixed(2): '' }}
@@ -59,6 +59,15 @@ export default {
   computed: {
     totalPNL () {
       return this.trades.reduce((accumulator, currentValue) => accumulator + currentValue.profit_loss, 0).toFixed(2)
+    }
+  },
+  methods: {
+    convertTimeToSeconds (time) {
+      if (time < 9999999999) {
+        time = time * 1000
+      }
+
+      return time
     }
   }
 }

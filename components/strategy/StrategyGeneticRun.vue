@@ -23,7 +23,7 @@
             :headers="headers"
           >
             <template #item.created_at="{item}">
-              {{ short_date_time((new Date(item.created_at).valueOf() / 1000) - (new Date().getTimezoneOffset() * 60) ) }}
+              {{ short_date_time((new Date(item.created_at).valueOf()) - (new Date().getTimezoneOffset() * 60) ) }}
             </template>
             <template #item.actions="{item}">
               <v-btn
