@@ -126,15 +126,12 @@ export default {
         { text: 'Relative Strength Index', value: 'RelativeStrengthIndex' },
         { text: 'Performance Maximization', value: 'Pmax' },
         { text: 'Running Genetic', value: 'Genetic' },
-        { text: 'Neural Network', value: 'NeuralNetwork' },
-        { text: 'ML5 Neural Network', value: 'ML5NeuralNetwork' },
-        { text: 'Every Tick', value: 'EveryTick' },
+        { text: 'LSTM Network', value: 'LSTM' },
         { text: 'RSI Stochastic Take Profit', value: 'RSIStochasticTakeProfit' },
         { text: 'Mean Reversion', value: 'MeanReversion' },
         { text: 'T3 Cross', value: 'T3Cross' },
         { text: 'MACD Cross', value: 'MACDCross' },
-        { text: 'Arima', value: 'Arima' },
-        { text: 'BasicNeural', value: 'BasicNeural' }
+        { text: 'Arima', value: 'Arima' }
       ],
       brokers: [
         { text: 'Coinbase Broker', value: 'CoinbaseBroker' },
@@ -173,6 +170,12 @@ export default {
     'strategy.options.indicator' (val) {
       this.strategy.options = { indicator: val, geneticInterval: this.strategy.options.geneticInterval }
       this.getOptions(val, true)
+    }
+  },
+  created () {
+    if (process.env.NODE_ENV === 'development') {
+      // Only used for debugging
+      this.indicators.push({ text: 'Every Tick', value: 'EveryTick' })
     }
   },
   mounted () {

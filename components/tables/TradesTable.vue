@@ -4,6 +4,7 @@
       Trades
       <v-spacer />
       Total PNL: ${{ totalPNL }}
+      Total Fees: ${{ totalFees }}
     </v-card-title>
     <v-card-text>
       <v-data-table
@@ -59,6 +60,9 @@ export default {
   computed: {
     totalPNL () {
       return this.trades.reduce((accumulator, currentValue) => accumulator + currentValue.profit_loss, 0).toFixed(2)
+    },
+    totalFees () {
+      return this.trades.reduce((accumulator, currentValue) => accumulator + currentValue.fees, 0).toFixed(2)
     }
   },
   methods: {
